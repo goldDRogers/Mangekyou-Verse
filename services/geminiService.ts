@@ -8,7 +8,7 @@ export const generateAnimeList = async (count: number = 8): Promise<Anime[]> => 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate a list of ${count} fictional anime titles with short descriptions, ratings, genres, and types. Provide the data as a clean JSON array.`,
+      contents: `Generate a list of ${count} fictional anime titles with short descriptions, ratings, genres, types (TV, Movie, OVA, ONA, Special). Provide the data as a clean JSON array.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -33,7 +33,6 @@ export const generateAnimeList = async (count: number = 8): Promise<Anime[]> => 
 
     const data = JSON.parse(response.text || '[]');
     
-    // We'll map them and add placeholder thumbnails because image generation is expensive for 8 items at once
     return data.map((item: any) => ({
       ...item,
       thumbnail: `https://picsum.photos/seed/${item.id}/400/600`

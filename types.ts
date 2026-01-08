@@ -6,7 +6,7 @@ export interface Anime {
   thumbnail: string;
   rating: number;
   episodes: number;
-  type: 'TV' | 'Movie' | 'OVA';
+  type: 'TV' | 'Movie' | 'OVA' | 'ONA' | 'Special';
   status: 'Ongoing' | 'Completed';
   genres: string[];
 }
