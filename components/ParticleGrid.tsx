@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useEffect, useRef } from 'react';
 
@@ -44,12 +45,12 @@ const ParticleGrid: React.FC = () => {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      
+
       dots.forEach((dot) => {
         const dx = mouse.x - dot.originX;
         const dy = mouse.y - dot.originY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        
+
         let shiftX = 0;
         let shiftY = 0;
         let scale = 1;
@@ -67,7 +68,7 @@ const ParticleGrid: React.FC = () => {
 
         const alpha = dist < mouseRadius ? 0.4 + (0.4 * (1 - dist / mouseRadius)) : 0.12;
         ctx.fillStyle = `rgba(183, 148, 244, ${alpha})`;
-        
+
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, 1.4 * scale, 0, Math.PI * 2);
         ctx.fill();

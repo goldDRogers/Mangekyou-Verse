@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+    --color-brand-primary: #b794f4;
+    --color-brand-secondary: #5a2e98;
+    --color-brand-accent: #ca2221;
+    --color-brand-bg: #0f1011;
+    --color-brand-card: #1c1d21;
+
+    --animate-fade-in: fadeIn 0.5s ease-out;
+    --animate-slide-up: slideUp 0.4s ease-out;
+    --animate-pulse-glow: pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-spin-slow: spin 8s linear infinite;
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        0% {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes pulseGlow {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+            filter: brightness(1);
+        }
+
+        50% {
+            opacity: .8;
+            transform: scale(1.05);
+            filter: brightness(1.3);
+        }
+    }
+}
+
+@layer utilities {
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #b794f4;
+        border-radius: 10px;
+    }
+}
+
+body {
+    background-color: var(--color-brand-bg);
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+}

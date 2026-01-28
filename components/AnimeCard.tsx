@@ -1,6 +1,7 @@
+"use client";
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Anime } from '../types';
 
 interface AnimeCardProps {
@@ -9,15 +10,15 @@ interface AnimeCardProps {
 
 const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
   return (
-    <Link to={`/watch/${anime.id}`} className="group block relative animate-slide-up">
+    <Link href={`/watch/${anime.id}`} className="group block relative animate-slide-up">
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-brand-card border border-white/5 group-hover:border-brand-accent/50 transition-all duration-300">
-        <img 
-          src={anime.thumbnail} 
+        <img
+          src={anime.thumbnail}
           alt={anime.title}
           className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
         />
-        
+
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           <span className="bg-brand-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">

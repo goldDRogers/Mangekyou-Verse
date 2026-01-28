@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,19 +14,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { user, logoutUser } = useAuth();
-  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${searchQuery}`);
+      router.push(`/search?q=${searchQuery}`);
     }
   };
 
-  const handleLogout = () => {
-    logoutUser();
-    navigate('/');
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/login');
   };
 
   return (
@@ -66,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <i className="fa-solid fa-bars-staggered"></i>
           </button>
 
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <Logo className="w-12 h-12 transition-all duration-700 group-hover:rotate-[360deg]" />
             <span className="text-2xl font-black tracking-tighter uppercase text-white hidden sm:block">
               Mangekyou<span className="text-brand-primary">Verse</span>
@@ -74,15 +77,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
-            <Link to="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Home</Link>
-            <Link to="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Movies</Link>
-            <Link to="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">TV Series</Link>
-            <Link to="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Most Popular</Link>
+            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Home</Link>
+            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Movies</Link>
+            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">TV Series</Link>
+            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Most Popular</Link>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <form onSubmit={handleSearch} className="hidden md:flex items-center bg-white/5 rounded-full px-5 py-2 w-72 border border-white/10 focus-within:border-brand-primary/50 transition-all">
+          <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 bg-white/5 rounded-full px-4 py-2 w-72 border border-white/10 focus-within:border-brand-primary/50 transition-all group/navsearch">
+            <i className="fa-solid fa-user-ninja text-xs text-gray-700 group-focus-within/navsearch:text-brand-primary transition-colors"></i>
             <input
               type="text"
               placeholder="Filter anime..."
@@ -97,20 +101,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {user ? (
             <div className="flex items-center gap-4">
-              <Link to="/watchlist" className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-brand-primary transition-colors rounded-full hover:bg-white/5" title="My Collection">
+              <Link href="/watchlist" className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-brand-primary transition-colors rounded-full hover:bg-white/5" title="My Collection">
                 <i className="fa-solid fa-heart text-lg"></i>
               </Link>
-              <button
-                onClick={handleLogout}
-                className="w-9 h-9 rounded-full border-2 border-brand-primary p-0.5 overflow-hidden shadow-lg shadow-brand-primary/20 hover:scale-105 transition-transform"
-                title="Logout"
+              <Link
+                href="/account"
+                className="w-10 h-10 rounded-full border-2 border-brand-primary p-0.5 overflow-hidden shadow-lg shadow-brand-primary/20 hover:scale-105 transition-transform group"
+                title="Account Settings"
               >
-                <img src={`https://ui-avatars.com/api/?name=${user.username}&background=b794f4&color=fff`} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-              </button>
+                <img src={`https://ui-avatars.com/api/?name=${user.email?.split('@')[0]}&background=b794f4&color=fff&bold=true`} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+              </Link>
             </div>
           ) : (
             <Link
-              to="/login"
+              href="/login"
               className="bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-brand-primary/10 flex items-center gap-2"
             >
               <i className="fa-solid fa-user"></i>
@@ -131,11 +135,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <button onClick={() => setIsSidebarOpen(false)} className="text-2xl hover:text-brand-primary transition-colors"><i className="fa-solid fa-xmark"></i></button>
           </div>
           <div className="flex flex-col gap-6">
-            <Link to="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-house text-brand-primary"></i> Home</Link>
+            <Link href="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-house text-brand-primary"></i> Home</Link>
             {user && (
-              <Link to="/watchlist" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-heart text-brand-primary"></i> Collection</Link>
+              <Link href="/watchlist" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-heart text-brand-primary"></i> Collection</Link>
             )}
-            <Link to="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-film text-brand-primary"></i> Movies</Link>
+            <Link href="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-film text-brand-primary"></i> Movies</Link>
           </div>
           <div className="mt-auto space-y-6">
             <div className="h-[1px] bg-white/5 w-full"></div>
@@ -160,8 +164,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-4 text-xs font-black uppercase tracking-widest text-gray-500">
-            <Link to="/" className="hover:text-brand-primary transition-colors">Terms of Service</Link>
-            <Link to="/" className="hover:text-brand-primary transition-colors">Privacy Policy</Link>
+            <Link href="/" className="hover:text-brand-primary transition-colors">Terms of Service</Link>
+            <Link href="/" className="hover:text-brand-primary transition-colors">Privacy Policy</Link>
           </div>
 
           <div className="max-w-xl text-[10px] text-gray-600 font-bold uppercase tracking-widest leading-loose">

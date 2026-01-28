@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import AnimeCard from '../components/AnimeCard';
 import SpotlightSlider from '../components/home/SpotlightSlider';
 import TrendingCarousel from '../components/home/TrendingCarousel';
+import Top10Sidebar from '../components/home/Top10Sidebar';
 import Logo from '../components/Logo';
 import ParticleGrid from '../components/ParticleGrid';
 import { generateAnimeList } from '../services/geminiService';
@@ -114,60 +115,63 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="bg-[#0f1011] overflow-x-hidden">
-      {/* Search Landing */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Whole Page Interactive Particle Grid */}
-        <div className="absolute inset-0 z-0">
+    <div className="bg-brand-bg relative min-h-screen overflow-x-hidden">
+      {/* Search Landing Section */}
+      <section className="relative min-h-[90vh] md:min-h-[95vh] flex items-center justify-center py-20">
+        {/* Visual Background Elements */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <ParticleGrid />
+
+          {/* Ambient Glows */}
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-brand-primary/10 rounded-full blur-[150px] animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-secondary/10 rounded-full blur-[150px] animate-pulse"></div>
+
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none"></div>
         </div>
 
-        {/* Dynamic Background Collage */}
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-          <div className="absolute inset-y-0 right-[-10%] w-[120%] flex gap-6 grayscale opacity-40">
-            <img src="https://images3.alphacoders.com/131/1314352.png" className="h-full w-1/5 object-cover skew-x-[-15deg] scale-110" alt="bg-1" />
-            <img src="https://images.alphacoders.com/134/1341498.png" className="h-full w-1/5 object-cover skew-x-[-15deg] scale-110" alt="bg-2" />
-            <img src="https://images.alphacoders.com/133/1330368.png" className="h-full w-1/5 object-cover skew-x-[-15deg] scale-110" alt="bg-3" />
-            <img src="https://images2.alphacoders.com/132/1320490.png" className="h-full w-1/5 object-cover skew-x-[-15deg] scale-110" alt="bg-4" />
-            <img src="https://images8.alphacoders.com/133/1333798.png" className="h-full w-1/5 object-cover skew-x-[-15deg] scale-110" alt="bg-5" />
-          </div>
-          {/* Gradient Shadows */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1011] via-[#0f1011]/80 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1011] to-transparent"></div>
-        </div>
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6">
+          <div className="flex flex-col items-center gap-10 md:gap-14 animate-fade-in text-center">
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full pt-10">
-          <div className="max-w-2xl space-y-12 animate-fade-in">
-            {/* Project Branding */}
-            <div className="relative flex items-center gap-10 group cursor-default">
-              <div className="relative z-20 flex items-center gap-10">
-                <Logo className="w-24 h-24 transform rotate-12 group-hover:rotate-0 transition-all duration-1000 animate-spin-slow" />
-                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.75] drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]">
-                  Mangekyou<br /><span className="text-brand-primary">Verse</span>
+            {/* Branding Section */}
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 group cursor-default">
+              <div className="relative">
+                <div className="absolute inset-0 bg-brand-primary/20 blur-3xl rounded-full animate-pulse"></div>
+                <Logo className="w-20 h-20 md:w-32 md:h-32 transform transition-all duration-1000 group-hover:rotate-[360deg] animate-spin-slow relative z-10" />
+              </div>
+              <div className="flex flex-col items-center md:items-start">
+                <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-2xl">
+                  MANGEKYOU<span className="text-brand-primary">VERSE</span>
                 </h1>
+                <p className="text-[10px] md:text-xs font-black text-brand-primary opacity-60 uppercase tracking-[0.6em] mt-2 md:mt-4 ml-1">
+                  The Ultimate Anime Node
+                </p>
               </div>
             </div>
 
-            {/* Premium Search Bar with Suggestions */}
-            <div className="relative" ref={searchContainerRef}>
-              <form onSubmit={handleSearchSubmit} className="flex gap-4">
+            {/* Premium Search Container */}
+            <div className="w-full max-w-3xl relative" ref={searchContainerRef}>
+              <form onSubmit={handleSearchSubmit} className="relative group">
                 <input
                   type="text"
                   placeholder="What are you looking for today?"
-                  className="w-full h-14 md:h-20 bg-white rounded-[32px] px-12 text-black text-xl md:text-2xl font-bold focus:outline-none focus:ring-[12px] focus:ring-brand-primary/20 transition-all shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
+                  className="w-full h-16 md:h-24 bg-white rounded-[40px] pl-10 md:pl-16 pr-24 md:pr-32 text-lg md:text-2xl font-bold text-black border-none focus:outline-none focus:ring-[12px] md:focus:ring-[16px] focus:ring-brand-primary/15 transition-all shadow-[0_40px_100px_rgba(0,0,0,0.6)] placeholder:text-gray-400"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
                 />
-                <button type="submit" className="w-14 h-14 md:w-20 md:h-20 bg-brand-primary rounded-[32px] flex items-center justify-center text-[#0f1011] text-3xl md:text-4xl hover:bg-[#cbb2f9] transition-all transform hover:scale-105 active:scale-95 shadow-2xl shadow-brand-primary/40">
+                <button
+                  type="submit"
+                  className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 bg-brand-primary rounded-full flex items-center justify-center text-black text-xl md:text-2xl hover:scale-110 active:scale-95 transition-all shadow-xl shadow-brand-primary/40 group-hover:shadow-brand-primary/60"
+                >
                   <i className="fa-solid fa-magnifying-glass"></i>
                 </button>
               </form>
 
-              {/* Suggestions Dropdown */}
+              {/* Enhanced Suggestions Dropdown */}
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-4 bg-[#2a2b3c]/95 backdrop-blur-xl rounded-[32px] border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.8)] overflow-hidden z-[100] animate-fade-in">
-                  <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                <div className="absolute top-full left-0 right-0 mt-6 bg-[#1a1b26]/95 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.9)] overflow-hidden z-[100] animate-slide-up">
+                  <div className="max-h-[450px] overflow-y-auto custom-scrollbar p-3">
                     {filteredSuggestions.map((item) => (
                       <div
                         key={item.id}
@@ -175,20 +179,24 @@ const Home: React.FC = () => {
                           navigate(`/watch/${item.id}`);
                           setShowSuggestions(false);
                         }}
-                        className="flex items-center gap-6 p-4 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-none transition-colors group"
+                        className="flex items-center gap-6 p-4 hover:bg-white/5 rounded-2xl cursor-pointer transition-all group"
                       >
-                        <img
-                          src={item.thumbnail}
-                          alt={item.title}
-                          className="w-14 h-20 rounded-xl object-cover shadow-lg border border-white/10 group-hover:scale-105 transition-transform"
-                        />
-                        <div className="flex flex-col gap-1">
-                          <h4 className="text-lg font-black text-white group-hover:text-brand-primary transition-colors leading-tight">{item.title}</h4>
-                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest line-clamp-1">{item.original}</p>
-                          <div className="flex items-center gap-3 text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                        <div className="relative w-16 h-24 flex-shrink-0">
+                          <img
+                            src={item.thumbnail}
+                            alt={item.title}
+                            className="w-full h-full rounded-xl object-cover shadow-2xl border border-white/10 group-hover:scale-105 transition-transform"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                        <div className="flex flex-col gap-1.5 flex-grow">
+                          <div className="flex items-start justify-between gap-4">
+                            <h4 className="text-xl font-black text-white group-hover:text-brand-primary transition-colors leading-tight line-clamp-1">{item.title}</h4>
+                            <span className="text-[10px] bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded font-black uppercase tracking-widest">{item.type}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest line-clamp-1">{item.original}</p>
+                          <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 border-t border-white/5 pt-2">
                             <span>{item.date}</span>
-                            <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                            <span className="text-brand-primary">{item.type}</span>
                             <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                             <span>{item.duration}</span>
                           </div>
@@ -198,132 +206,127 @@ const Home: React.FC = () => {
                   </div>
                   <div
                     onClick={handleSearchSubmit}
-                    className="p-4 bg-black/30 text-center text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary hover:text-white cursor-pointer transition-colors border-t border-white/5"
+                    className="p-5 bg-black/40 text-center text-[11px] font-black uppercase tracking-[0.4em] text-brand-primary hover:text-white cursor-pointer transition-all border-t border-white/10 group"
                   >
-                    View all results <i className="fa-solid fa-chevron-right ml-2"></i>
+                    View All Results <i className="fa-solid fa-arrow-right ml-3 transform group-hover:translate-x-2 transition-transform"></i>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Search Cloud Tags */}
-            <div className="space-y-4">
-              <p className="text-gray-200 text-sm font-black uppercase tracking-widest flex flex-wrap gap-x-6 gap-y-3 opacity-90">
-                <span className="text-gray-500 font-bold border-r border-white/10 pr-6">Top search:</span>
-                {topSearches.map((tag, idx) => (
-                  <span key={idx} className="hover:text-brand-primary cursor-pointer transition-colors border-b-2 border-transparent hover:border-brand-primary/50 text-xs">
+            {/* Quick Access Tags */}
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-wrap justify-center gap-3">
+                <span className="text-[11px] font-black text-gray-500 uppercase tracking-[0.2em] mr-4 self-center px-4 border-r border-white/10">Trending Tags:</span>
+                {topSearches.slice(0, 6).map((tag, idx) => (
+                  <button key={idx} className="bg-white/5 hover:bg-brand-primary hover:text-black px-5 py-2 rounded-full text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-all border border-white/5 hover:border-brand-primary/50">
                     {tag}
-                  </span>
+                  </button>
                 ))}
-              </p>
-            </div>
-
-            {/* Action Button */}
-            <button
-              onClick={scrollToContent}
-              className="group flex items-center gap-6 bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-10 py-5 rounded-[32px] font-black text-xl uppercase tracking-[0.2em] transition-all transform hover:scale-[1.08] active:scale-95 shadow-[0_20px_50px_rgba(183,148,244,0.4)]"
-            >
-              Watch anime
-              <div className="bg-[#0f1011] w-10 h-10 rounded-full flex items-center justify-center text-white text-sm group-hover:translate-x-4 transition-transform">
-                <i className="fa-solid fa-arrow-right"></i>
               </div>
-            </button>
+
+              {/* Call to Action */}
+              <button
+                onClick={scrollToContent}
+                className="group flex flex-col items-center gap-4 mt-8"
+              >
+                <div className="bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-12 py-5 rounded-full font-black text-xl uppercase tracking-[0.3em] transition-all transform hover:scale-[1.05] active:scale-95 shadow-[0_30px_70px_rgba(183,148,244,0.3)]">
+                  Continue to Home
+                </div>
+                <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-brand-primary transition-colors animate-bounce mt-4">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em]">Scroll Down</span>
+                  <i className="fa-solid fa-chevron-down text-lg"></i>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Spotlight Slider Section */}
-      <section ref={contentRef} className="pt-24 pb-12 bg-gradient-to-b from-[#0f1011] to-[#121315]">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
-          <div className="flex items-center gap-5 mb-3">
-            <span className="w-4 h-4 rounded-full bg-brand-primary animate-pulse shadow-[0_0_15px_rgba(183,148,244,1)]"></span>
-            <h2 className="text-base font-black uppercase tracking-[0.4em] text-brand-primary">Spotlight</h2>
-          </div>
-          <h3 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">Featured Collections</h3>
-        </div>
+      <section ref={contentRef} className="pt-0 bg-[#0f1011]">
         <SpotlightSlider items={spotlight} />
       </section>
 
-      {/* Main Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-24 space-y-40">
-        {/* Trending Section */}
-        <section>
+      {/* Trending Section (Full Width) */}
+      <section className="bg-[#0f1011] pb-8 relative z-10 -mt-10">
+        <div className="max-w-[1920px] mx-auto">
           <TrendingCarousel items={trending} />
-        </section>
+        </div>
+      </section>
 
-        {/* Top Airing Section */}
-        <section>
-          <div className="flex items-center justify-between mb-16">
-            <h2 className="text-4xl font-black text-white flex items-center gap-5 uppercase tracking-tighter">
-              <span className="w-3 h-12 bg-brand-primary rounded-full shadow-2xl shadow-brand-primary/40"></span>
-              Top Airing
-            </h2>
-            <button className="text-xs text-gray-400 hover:text-brand-primary font-black transition-all uppercase tracking-[0.3em] flex items-center gap-3 group border-2 border-white/5 px-8 py-3.5 rounded-full hover:bg-white/5 hover:border-brand-primary/20">
-              Discover All <i className="fa-solid fa-chevron-right group-hover:translate-x-3 transition-transform text-xs"></i>
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-10">
-            {topAiring.map(anime => (
-              <AnimeCard key={anime.id} anime={anime} />
-            ))}
-          </div>
-        </section>
+      {/* Main Content Layout */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-        {/* Community & Rankings Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Promo Card */}
-          <div className="lg:col-span-8">
-            <section className="bg-brand-card rounded-[48px] p-12 border border-white/5 relative overflow-hidden group shadow-[0_40px_120px_rgba(0,0,0,0.6)]">
-              <div className="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-              <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-brand-primary/10 blur-[150px] group-hover:bg-brand-primary/20 transition-all duration-1500"></div>
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-16">
-                <div className="space-y-8 text-center md:text-left flex-grow">
-                  <span className="bg-brand-primary/20 text-brand-primary text-xs font-black px-6 py-3 rounded-full uppercase tracking-[0.3em] border border-brand-primary/30 shadow-inner">Elite Node Member</span>
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tight leading-[0.9]">Assemble The Order</h3>
-                  <p className="text-gray-500 text-base leading-relaxed max-w-md font-medium">Unlock exclusive high-bitrate streams, AI-assisted translations, and priority schedule access.</p>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-6 pt-6">
-                    <button className="bg-brand-primary text-[#0f1011] px-12 py-5 rounded-[24px] text-sm font-black uppercase tracking-widest hover:scale-110 transition-all shadow-2xl shadow-brand-primary/40">Join Discord</button>
-                    <button className="bg-white/5 border border-white/10 text-white px-12 py-5 rounded-[24px] text-sm font-black uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md">Support Collective</button>
-                  </div>
-                </div>
-                <div className="relative">
-                  <i className="fa-brands fa-discord text-[150px] text-brand-primary opacity-20 group-hover:opacity-100 group-hover:rotate-12 transition-all duration-1000 group-hover:drop-shadow-[0_0_50px_rgba(183,148,244,0.6)]"></i>
-                </div>
+          {/* LEFT COLUMN: Main Content */}
+          <div className="lg:col-span-3 space-y-12">
+
+            {/* Latest Updated Section */}
+            <section>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black text-brand-primary flex items-center gap-3 uppercase tracking-wide">
+                  <i className="fa-solid fa-play text-xl"></i>
+                  Latest Episodes
+                </h2>
+                <button className="text-xs text-gray-400 hover:text-white transition-colors uppercase tracking-widest font-bold">
+                  View All <i className="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+                </button>
               </div>
-            </section>
-          </div>
 
-          {/* Rankings Sidebar */}
-          <div className="lg:col-span-4">
-            <section className="bg-brand-card rounded-[64px] p-12 border border-white/5 h-full shadow-2xl relative overflow-hidden">
-              <h3 className="text-2xl font-black text-white mb-12 uppercase tracking-[0.4em] flex items-center justify-between">
-                Rankings
-                <i className="fa-solid fa-trophy text-brand-primary opacity-50 animate-bounce"></i>
-              </h3>
-              <div className="space-y-10">
-                {topAiring.slice(0, 5).map((anime, idx) => (
-                  <div key={anime.id} className="flex items-center gap-8 group cursor-pointer">
-                    <div className="relative">
-                      <span className={`text-5xl font-black italic transition-all duration-500 ${idx < 3 ? 'text-brand-primary scale-125' : 'text-gray-800'}`}>0{idx + 1}</span>
-                      {idx === 0 && <i className="fa-solid fa-crown absolute -top-4 -left-4 text-yellow-500 text-lg rotate-[-25deg] drop-shadow-lg"></i>}
-                    </div>
-                    <div className="w-16 h-16 rounded-[20px] overflow-hidden bg-brand-bg border-2 border-white/10 group-hover:border-brand-primary transition-all shadow-2xl">
-                      <img src={anime.thumbnail} alt={anime.title} className="w-full h-full object-cover group-hover:scale-150 transition-transform duration-[2000ms]" />
-                    </div>
-                    <div className="flex-grow">
-                      <h4 className="text-base font-black text-gray-200 group-hover:text-brand-primary transition-colors line-clamp-1 uppercase tracking-tight">{anime.title}</h4>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-[10px] font-black text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-lg border border-brand-primary/20">#{idx + 1} S-CLASS</span>
-                        <div className="flex items-center gap-1.5">
-                          <i className="fa-solid fa-star text-brand-primary text-xs"></i>
-                          <span className="text-xs text-gray-500 font-black">{anime.rating}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-8">
+                {topAiring.map(anime => (
+                  <AnimeCard key={anime.id} anime={anime} />
                 ))}
               </div>
             </section>
+
+            {/* New Recommendations Section (Mock) */}
+            <section>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black text-[#ca2221] flex items-center gap-3 uppercase tracking-wide">
+                  <i className="fa-solid fa-fire text-xl"></i>
+                  New on Mangekyou
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-8">
+                {/* Reusing list for demo purposes, reversed */}
+                {[...topAiring].reverse().slice(0, 8).map(anime => (
+                  <AnimeCard key={`new-${anime.id}`} anime={anime} />
+                ))}
+              </div>
+            </section>
+
+          </div>
+
+          {/* RIGHT COLUMN: Sidebar */}
+          <div className="lg:col-span-1 space-y-8">
+            <Top10Sidebar items={trending.length > 0 ? trending : topAiring} />
+
+            {/* Genres Block */}
+            <div className="bg-[#1f2026] p-6 rounded-lg border border-white/5">
+              <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Genres</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {['Action', 'Adventure', 'Cars', 'Comedy', 'Dementia', 'Demons', 'Drama', 'Ecchi', 'Fantasy', 'Game', 'Harem', 'Historical', 'Horror', 'Isekai', 'Josei', 'Kids', 'Magic', 'Mecha'].map(genre => (
+                  <a key={genre} href="#" className="text-[11px] text-gray-400 hover:text-brand-primary hover:bg-white/5 px-2 py-1 rounded transition-colors truncate">
+                    {genre}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Community Promo */}
+            <div className="bg-gradient-to-br from-brand-secondary to-[#0f1011] p-6 rounded-lg text-center relative overflow-hidden group">
+              <div className="relative z-10">
+                <i className="fa-brands fa-discord text-4xl text-white mb-3"></i>
+                <h3 className="text-white font-black uppercase text-lg mb-2">Join Our Discord</h3>
+                <p className="text-xs text-white/70 mb-4">Chat with other fans, get updates, and request anime.</p>
+                <button className="bg-white text-brand-secondary px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                  Join Server
+                </button>
+              </div>
+              <i className="fa-brands fa-discord text-[100px] absolute -bottom-4 -right-4 text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+            </div>
           </div>
         </div>
       </div>

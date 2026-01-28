@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 interface TrendingProps {
@@ -47,7 +49,7 @@ const TrendingCarousel: React.FC<TrendingProps> = ({ items }) => {
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <Link to={`/watch/${item.id}`} className="block relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-900 border border-white/5 shadow-2xl">
+                        <Link href={`/watch/${item.id}`} className="block relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-900 border border-white/5 shadow-2xl">
                             {/* Rank Badge */}
                             <div className="absolute top-0 left-0 bg-brand-primary text-black font-black text-xl px-4 py-2 rounded-br-2xl z-10 shadow-lg">
                                 #{item.rank}

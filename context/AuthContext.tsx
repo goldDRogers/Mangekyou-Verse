@@ -1,70 +1,58 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { login, register, logout, getMe } from '../services/authService';
+"use client";
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Session, User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
-    user: any;
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
-    loginUser: (userData: any) => Promise<void>;
-    registerUser: (userData: any) => Promise<void>;
-    logoutUser: () => void;
+    user: User | null;
+    session: Session | null;
+    loading: boolean;
+    signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any>(null);
-    const [status, setStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
-    const [error, setError] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        const checkUser = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const userData = await getMe();
-                    setUser(userData);
-                } catch (err) {
-                    localStorage.removeItem('token');
-                }
-            }
+        // 1. Initial Session Check
+        const initSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
         };
-        checkUser();
-    }, []);
 
-    const loginUser = async (userData: any) => {
-        setStatus('loading');
-        try {
-            const data = await login(userData);
-            setUser(data.user);
-            setStatus('succeeded');
-        } catch (err: any) {
-            setStatus('failed');
-            setError(err.response?.data?.message || 'Login failed');
-            throw err;
-        }
-    };
+        initSession();
 
-    const registerUser = async (userData: any) => {
-        setStatus('loading');
-        try {
-            const data = await register(userData);
-            setUser(data.user);
-            setStatus('succeeded');
-        } catch (err: any) {
-            setStatus('failed');
-            setError(err.response?.data?.message || 'Registration failed');
-            throw err;
-        }
-    };
+        // 2. Listen for Auth Changes (Login/Logout/Token Refresh)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
 
-    const logoutUser = () => {
-        logout();
-        setUser(null);
+            if (_event === 'SIGNED_OUT') {
+                router.push('/login');
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [router]);
+
+    const signOut = async () => {
+        setLoading(true);
+        await supabase.auth.signOut();
+        router.push('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, status, error, loginUser, registerUser, logoutUser }}>
+        <AuthContext.Provider value={{ user, session, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Anime } from '../../types';
 
 interface SpotlightProps {
@@ -76,13 +78,13 @@ const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
 
                             <div className="flex items-center gap-4 pt-4">
                                 <Link
-                                    to={`/watch/${currentItem.id}`}
+                                    href={`/watch/${currentItem.id}`}
                                     className="bg-brand-primary text-[#0f1011] px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center gap-3 shadow-lg shadow-brand-primary/20"
                                 >
                                     <i className="fa-solid fa-play"></i> Watch Now
                                 </Link>
                                 <Link
-                                    to={`/watch/${currentItem.id}`}
+                                    href={`/watch/${currentItem.id}`}
                                     className="bg-white/5 border border-white/10 text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-md"
                                 >
                                     Details <i className="fa-solid fa-chevron-right text-xs"></i>

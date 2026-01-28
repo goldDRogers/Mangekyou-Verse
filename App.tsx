@@ -9,6 +9,8 @@ import Watchlist from './pages/Watchlist';
 import Search from './pages/Search';
 import { AuthProvider } from './context/AuthContext';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -18,7 +20,25 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/watchlist" element={<Watchlist />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/watchlist"
+              element={
+                <ProtectedRoute>
+                  <Watchlist />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <div className="p-10 text-center text-gray-500 font-bold uppercase tracking-widest pt-32">History feature coming soon</div>
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="/search" element={<Search />} />
             <Route path="/watch/:id" element={<Watch />} />
             <Route path="*" element={<Home />} />

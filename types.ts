@@ -4,6 +4,7 @@ export interface Anime {
   title: string;
   description: string;
   thumbnail: string;
+  gallery?: string[];
   rating: number;
   episodes: number;
   type: 'TV' | 'Movie' | 'OVA' | 'ONA' | 'Special';
