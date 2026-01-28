@@ -5,9 +5,27 @@ import { Anime } from "../types";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export const generateAnimeList = async (count: number = 8): Promise<Anime[]> => {
+  // Graceful fallback if API fails
+  const mockData = Array.from({ length: count }).map((_, i) => ({
+    id: `mock-id-${i}`,
+    title: `Anime Title ${i + 1}`,
+    description: "This is a fallback description because the AI service is currently unavailable or the API key is missing. Add your Gemini API key to .env for dynamic content.",
+    rating: (Math.random() * 5 + 5).toFixed(1),
+    episodes: 12 + i,
+    type: 'TV',
+    status: 'Finished',
+    genres: ['Action', 'Fantasy'],
+    thumbnail: `https://picsum.photos/seed/mock${i}/300/400`
+  })) as unknown as Anime[];
+
   try {
+    if (!process.env.API_KEY && !import.meta.env.VITE_GEMINI_API_KEY) {
+      console.warn("Gemini API Key missing. Using fallback data.");
+      return mockData;
+    }
+
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash-exp',
       contents: `Generate a list of ${count} fictional anime titles with short descriptions, ratings, genres, types (TV, Movie, OVA, ONA, Special). Provide the data as a clean JSON array.`,
       config: {
         responseMimeType: "application/json",
@@ -32,14 +50,14 @@ export const generateAnimeList = async (count: number = 8): Promise<Anime[]> => 
     });
 
     const data = JSON.parse(response.text || '[]');
-    
+
     return data.map((item: any) => ({
       ...item,
       thumbnail: `https://picsum.photos/seed/${item.id}/400/600`
     }));
   } catch (error) {
     console.error("Error generating anime list:", error);
-    return [];
+    return mockData;
   }
 };
 
