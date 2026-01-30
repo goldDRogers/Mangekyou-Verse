@@ -4,6 +4,12 @@ import { Anime } from '../types';
 
 export const watchlistService = {
     async getWatchlist(): Promise<Anime[]> {
+        // Check if Supabase is configured
+        if (!supabase) {
+            console.warn('Supabase not configured. Returning empty watchlist.');
+            return [];
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return [];
 
@@ -31,6 +37,10 @@ export const watchlistService = {
     },
 
     async toggleWatchlist(animeId: string) {
+        if (!supabase) {
+            throw new Error("Supabase not configured");
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Must be logged in");
 
@@ -61,6 +71,10 @@ export const watchlistService = {
     },
 
     async isInWatchlist(animeId: string) {
+        if (!supabase) {
+            return false;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return false;
 
@@ -77,6 +91,10 @@ export const watchlistService = {
 
 export const historyService = {
     async getHistory() {
+        if (!supabase) {
+            return [];
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return [];
 
@@ -91,6 +109,10 @@ export const historyService = {
     },
 
     async getContinueWatching(): Promise<Array<{anime: Anime; progress: number; episode: number}>> {
+        if (!supabase) {
+            return [];
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return [];
 
@@ -126,6 +148,10 @@ export const historyService = {
     },
 
     async updateProgress(animeId: string, episodeId: string, seconds: number) {
+        if (!supabase) {
+            return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 

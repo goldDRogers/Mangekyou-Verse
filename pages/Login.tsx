@@ -14,9 +14,19 @@ const LoginComponent = () => {
     useEffect(() => {
         // Check if user is already logged in
         const checkAuth = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                router.push('/');
+            try {
+                // Check if Supabase is properly configured
+                if (!supabase) {
+                    console.warn('Supabase not configured. Skipping auth check.');
+                    return;
+                }
+                
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    router.push('/');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
             }
         };
         checkAuth();
@@ -28,6 +38,10 @@ const LoginComponent = () => {
         setError('');
 
         try {
+            if (!supabase) {
+                throw new Error('Supabase not configured');
+            }
+
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
