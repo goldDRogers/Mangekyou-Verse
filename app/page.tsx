@@ -9,8 +9,7 @@ import SpotlightSlider from '@/components/home/SpotlightSlider';
 import TrendingCarousel from '@/components/home/TrendingCarousel';
 import Top10Sidebar from '@/components/home/Top10Sidebar';
 import ContinueWatching from '@/components/home/ContinueWatching';
-import { generateAnimeList } from '@/services/geminiService';
-import { getSpotlight, getTrending } from '@/services/animeService';
+import { getSpotlight, getTrending, getRecentAnime } from '@/services/animeService';
 import { Anime } from '@/types';
 import Link from 'next/link';
 
@@ -27,15 +26,15 @@ export default function HomePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [spotlightData, trendingData, fullList] = await Promise.all([
+                const [spotlightData, trendingData, recentData] = await Promise.all([
                     getSpotlight(),
                     getTrending(),
-                    generateAnimeList(18)
+                    getRecentAnime()
                 ]);
 
                 setSpotlight(spotlightData);
                 setTrending(trendingData);
-                setTopAiring(fullList.slice(6));
+                setTopAiring(recentData.slice(0, 12)); // Show 12 recent anime
             } catch (err) {
                 console.error("Failed to load content", err);
             } finally {
@@ -186,7 +185,7 @@ export default function HomePage() {
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
                                 {topAiring.map(anime => (
-                                    <AnimeCard key={anime.id} anime={anime} />
+                                    <AnimeCard key={anime.id} anime={anime} malId={anime.malId} />
                                 ))}
                             </div>
                         </section>

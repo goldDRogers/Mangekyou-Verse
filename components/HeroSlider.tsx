@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Anime } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 interface HeroSliderProps {
   items: Anime[];
@@ -9,7 +9,7 @@ interface HeroSliderProps {
 
 const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -66,7 +66,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
 
           <div className="flex flex-wrap gap-5 pt-4">
             <button 
-              onClick={() => navigate(`/watch/${activeItem.id}`)}
+              onClick={() => router.push(`/watch/${activeItem.id}`)}
               className="group flex items-center gap-4 bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-10 py-5 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-110 active:scale-95 shadow-2xl shadow-brand-primary/30"
             >
               <i className="fa-solid fa-play-circle text-lg"></i>

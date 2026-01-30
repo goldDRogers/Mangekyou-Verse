@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import { getAnimeDetails } from '@/services/geminiService';
 import { getAnimeDetailsFromBackend, getEpisodes } from '@/services/animeService';
 import { historyService, watchlistService } from '@/services/watchlistService';
 import { Anime } from '@/types';
 import { motion } from 'framer-motion';
+import { createWatchRedirectHandler, getExternalSiteInfo } from '@/lib/externalRedirect';
 
 export default function WatchPage() {
     const params = useParams();
@@ -17,8 +17,25 @@ export default function WatchPage() {
     const [loading, setLoading] = useState(true);
     const [inWatchlist, setInWatchlist] = useState(false);
     const [currentEpisode, setCurrentEpisode] = useState(1);
+    const [redirectLoading, setRedirectLoading] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [progress, setProgress] = useState(0);
+
+    // Create external redirect handler with MAL ID and loading state
+    const handleWatchExternal = async () => {
+        if (!anime) return;
+        
+        setRedirectLoading(true);
+        try {
+            const handler = createWatchRedirectHandler(anime.title, anime.malId);
+            await handler();
+        } catch (error) {
+            console.error('Failed to redirect:', error);
+        } finally {
+            setRedirectLoading(false);
+        }
+    };
+    const externalSite = getExternalSiteInfo();
 
     useEffect(() => {
         if (!id) return;
@@ -26,13 +43,8 @@ export default function WatchPage() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Try backend first
-                let data = await getAnimeDetailsFromBackend(id);
-
-                // If backend fails, try Gemini (fictional data)
-                if (!data) {
-                    data = await getAnimeDetails(id);
-                }
+                // Get anime details from Jikan API via our service
+                const data = await getAnimeDetailsFromBackend(id);
 
                 if (!data) {
                     router.push('/');
@@ -43,7 +55,7 @@ export default function WatchPage() {
                 const isSaved = await watchlistService.isInWatchlist(id);
                 setInWatchlist(isSaved);
 
-                // Try to get episodes from backend
+                // Try to get episodes from Jikan API
                 const backendEpisodes = await getEpisodes(id);
                 if (backendEpisodes && backendEpisodes.length > 0) {
                     // Update anime with real episodes if available
@@ -109,45 +121,61 @@ export default function WatchPage() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Player Column */}
                 <div className="lg:col-span-3 space-y-6">
-                    {/* Video Player Placeholder */}
-                    <div className="aspect-video bg-black rounded-2xl overflow-hidden relative shadow-2xl border border-white/5 group">
-                        <img
-                            src={anime.gallery ? anime.gallery[0] : anime.thumbnail}
-                            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                            alt="Player Background"
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20">
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="w-24 h-24 rounded-full bg-brand-primary/20 backdrop-blur-md border border-brand-primary/50 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-[0_0_50px_rgba(183,148,244,0.3)]"
-                            >
-                                <i className="fa-solid fa-play text-4xl text-brand-primary animate-pulse"></i>
-                            </motion.div>
-                            <p className="mt-8 text-white/90 font-black uppercase tracking-[0.3em] text-[10px] bg-black/60 px-6 py-2 rounded-full backdrop-blur-md">
-                                Streaming Episode {currentEpisode}
+                {/* External Redirect Section */}
+                <div className="aspect-video bg-black rounded-2xl overflow-hidden relative shadow-2xl border border-white/5 group">
+                    <img
+                        src={anime.gallery ? anime.gallery[0] : anime.thumbnail}
+                        className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                        alt="Anime Background"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                        <motion.button
+                            onClick={handleWatchExternal}
+                            disabled={redirectLoading}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            whileHover={{ scale: redirectLoading ? 1 : 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-brand-primary hover:bg-brand-primary/90 text-black rounded-full w-32 h-32 flex flex-col items-center justify-center cursor-pointer transition-all shadow-[0_0_50px_rgba(183,148,244,0.5)] hover:shadow-[0_0_80px_rgba(183,148,244,0.8)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {redirectLoading ? (
+                                <>
+                                    <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin mb-2"></div>
+                                    <span className="text-xs font-black uppercase tracking-wider">
+                                        Loading...
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <i className={`${externalSite?.icon || 'fa-solid fa-external-link-alt'} text-3xl mb-2`}></i>
+                                    <span className="text-xs font-black uppercase tracking-wider">
+                                        Watch Now
+                                    </span>
+                                </>
+                            )}
+                        </motion.button>
+                        
+                        <div className="mt-8 text-center">
+                            <p className="text-white/90 font-black uppercase tracking-[0.3em] text-[10px] bg-black/60 px-6 py-2 rounded-full backdrop-blur-md mb-3">
+                                Stream on {externalSite?.name || 'external site'}
+                            </p>
+                            <p className="text-gray-400 text-xs max-w-md">
+                                You will be redirected to a third-party streaming site. 
+                                Mangekyou Verse is not responsible for external content.
                             </p>
                         </div>
+                    </div>
 
-                        {/* Controls Placeholder */}
-                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="flex items-center gap-6">
-                                <i className="fa-solid fa-play cursor-pointer hover:text-brand-primary transition-colors"></i>
-                                <i className="fa-solid fa-forward-step cursor-pointer hover:text-brand-primary transition-colors"></i>
-                                <div className="flex items-center gap-3">
-                                    <i className="fa-solid fa-volume-high text-xs opacity-50"></i>
-                                    <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
-                                        <div className="w-1/2 h-full bg-brand-primary"></div>
-                                    </div>
-                                </div>
-                                <span className="text-[10px] font-mono opacity-50">00:00 / 24:00</span>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <i className="fa-solid fa-gear cursor-pointer hover:text-brand-primary transition-colors text-xs"></i>
-                                <i className="fa-solid fa-expand cursor-pointer hover:text-brand-primary transition-colors text-xs"></i>
-                            </div>
+                    {/* External Site Badge */}
+                    <div className="absolute top-4 right-4">
+                        <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-full px-3 py-1.5 flex items-center gap-2">
+                            <i className={`${externalSite?.icon || 'fa-solid fa-external-link-alt'} text-xs text-brand-primary`}></i>
+                            <span className="text-xs text-white font-medium">
+                                {externalSite?.name || 'External'}
+                            </span>
                         </div>
                     </div>
+                </div>
 
                     {/* Info Section */}
                     <div className="bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col md:flex-row gap-8">

@@ -9,7 +9,7 @@ import ParticleGrid from '../components/ParticleGrid';
 import { generateAnimeList } from '../services/geminiService';
 import { getSpotlight, getTrending } from '../services/animeService';
 import { Anime } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 const Home: React.FC = () => {
   const [topAiring, setTopAiring] = useState<Anime[]>([]);
@@ -21,7 +21,7 @@ const Home: React.FC = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Sample data for suggestions
   const sampleSuggestions = [
@@ -176,7 +176,7 @@ const Home: React.FC = () => {
                       <div
                         key={item.id}
                         onClick={() => {
-                          navigate(`/watch/${item.id}`);
+                          router.push(`/watch/${item.id}`);
                           setShowSuggestions(false);
                         }}
                         className="flex items-center gap-6 p-4 hover:bg-white/5 rounded-2xl cursor-pointer transition-all group"

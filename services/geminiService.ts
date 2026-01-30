@@ -76,7 +76,7 @@ export const generateAnimeList = async (count: number = 8): Promise<Anime[]> => 
     // Use the API pattern that was working before (ai.models.generateContent)
     // @ts-ignore
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-latest', // Switched to -latest to fix v1beta 404
+      model: 'gemini-1.5-flash', // Fixed model name
       contents: [{ role: 'user', parts: [{ text: `Generate a list of 18 fictional anime titles with short descriptions, ratings, genres, types (TV, Movie, OVA, ONA, Special). Provide the data as a clean JSON array.` }] }],
       config: {
         responseMimeType: "application/json",
@@ -138,7 +138,7 @@ export const generateThumbnail = async (prompt: string): Promise<string | null> 
     if (!ai) return null;
     // @ts-ignore
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       contents: [{ role: 'user', parts: [{ text: `High quality anime style illustration for: ${prompt}` }] }]
     });
 
@@ -167,7 +167,7 @@ export const searchAnime = async (query: string, count: number = 12): Promise<An
 
     // @ts-ignore
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       contents: [{
         role: 'user',
         parts: [{ text: `Search for anime related to "${query}". Generate ${count} fictional anime titles that would match this search term, with short descriptions, ratings, genres, types (TV, Movie, OVA, ONA, Special). Provide the data as a clean JSON array.` }]
@@ -234,7 +234,7 @@ export const getAnimeDetails = async (id: string): Promise<Anime | null> => {
 
     // @ts-ignore
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-1.5-flash',
       contents: [{
         role: 'user',
         parts: [{ text: `Generate detailed information for a fictional anime with ID "${id}". Provide title, description, rating, episodes, type, status, and genres as a clean JSON object.` }]
