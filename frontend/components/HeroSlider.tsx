@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Anime } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 interface HeroSliderProps {
   items: Anime[];
@@ -9,7 +9,7 @@ interface HeroSliderProps {
 
 const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -29,7 +29,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
         <img 
           src={activeItem.thumbnail} 
           alt={activeItem.title} 
-          className="w-full h-full object-cover scale-110 blur-2xl opacity-40 transition-all duration-[2000ms]"
+          className="w-full h-full object-cover scale-110 blur-2xl opacity-40 transition-all duration-[2000ms] anime-poster"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0f1011] via-[#0f1011]/80 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f1011] via-transparent to-transparent"></div>
@@ -66,7 +66,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
 
           <div className="flex flex-wrap gap-5 pt-4">
             <button 
-              onClick={() => navigate(`/watch/${activeItem.id}`)}
+              onClick={() => router.push(`/watch/${activeItem.id}`)}
               className="group flex items-center gap-4 bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-10 py-5 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-110 active:scale-95 shadow-2xl shadow-brand-primary/30"
             >
               <i className="fa-solid fa-play-circle text-lg"></i>
@@ -81,7 +81,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
         
         {/* Large Floating Poster Image */}
         <div className="hidden lg:block ml-auto w-[400px] aspect-[3/4.5] rounded-[48px] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] border-4 border-white/10 transform rotate-3 hover:rotate-0 transition-all duration-[1500ms] group/poster relative">
-          <img src={activeItem.thumbnail} alt={activeItem.title} className="w-full h-full object-cover group-hover/poster:scale-110 transition-transform duration-[2000ms]" />
+          <img src={activeItem.thumbnail} alt={activeItem.title} className="w-full h-full object-cover group-hover/poster:scale-110 transition-transform duration-[2000ms] anime-poster" />
           <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover/poster:opacity-100 transition-opacity"></div>
         </div>
       </div>

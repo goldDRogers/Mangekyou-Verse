@@ -1,6 +1,7 @@
 
 export interface Anime {
   id: string;
+  malId?: number; // MyAnimeList ID for external linking
   title: string;
   description: string;
   thumbnail: string;

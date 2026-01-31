@@ -16,7 +16,7 @@ export default function ContinueWatching() {
 
         const fetchHistory = async () => {
             try {
-                const data = await historyService.getHistory();
+                const data = await historyService.getContinueWatching();
                 setHistory(data.slice(0, 6)); // Show top 6 latest
             } catch (err) {
                 console.error(err);
@@ -50,8 +50,8 @@ export default function ContinueWatching() {
                 ) : (
                     history.map((item) => (
                         <Link
-                            key={item.id}
-                            href={`/watch/${item.anime_id}?ep=${item.episode_id}`}
+                            key={`${item.anime.id}-${item.episode}`}
+                            href={`/watch/${item.anime.id}?ep=${item.episode}`}
                             className="group relative"
                         >
                             <motion.div
@@ -60,8 +60,8 @@ export default function ContinueWatching() {
                             >
                                 {/* Poster with Blur Overlay */}
                                 <img
-                                    src={`https://picsum.photos/seed/${item.anime_id}/300/200`}
-                                    alt="Anime Title"
+                                    src={item.anime.thumbnail}
+                                    alt={item.anime.title}
                                     className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                                 />
 
@@ -69,7 +69,7 @@ export default function ContinueWatching() {
                                 <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/40">
                                     <div
                                         className="h-full bg-brand-primary shadow-[0_0_10px_rgba(183,148,244,0.8)]"
-                                        style={{ width: '45%' }} // Mock progress for demo
+                                        style={{ width: `${Math.min((item.progress / 1440) * 100, 95)}%` }} // Calculate progress based on 24min episode
                                     ></div>
                                 </div>
 
@@ -82,10 +82,10 @@ export default function ContinueWatching() {
 
                             <div className="mt-3 px-2">
                                 <h4 className="text-[11px] font-black text-white uppercase tracking-widest line-clamp-1 group-hover:text-brand-primary transition-colors">
-                                    {item.anime_id.split('-').join(' ')}
+                                    {item.anime.title}
                                 </h4>
                                 <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-                                    Episode {item.episode_id}
+                                    Episode {item.episode}
                                 </p>
                             </div>
                         </Link>

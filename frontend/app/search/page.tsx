@@ -4,8 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
 import AnimeCard from '@/components/AnimeCard';
-import { searchAnime as searchGemini } from '@/services/geminiService';
-import api from '@/services/api';
+import { searchAnime } from '@/services/animeService';
 import { Anime } from '@/types';
 import { motion } from 'framer-motion';
 
@@ -23,17 +22,7 @@ function SearchResults() {
             }
             setLoading(true);
             try {
-                let data: Anime[] = [];
-                try {
-                    const response = await api.get(`/api/anime/search?q=${query}`);
-                    data = response.data;
-                } catch (e) {
-                    console.warn("Backend search failed, using Gemini.", e);
-                }
-
-                if (!data || data.length === 0) {
-                    data = await searchGemini(query);
-                }
+                const data = await searchAnime(query);
                 setResults(data);
             } catch (err) {
                 console.error("Search failed", err);
