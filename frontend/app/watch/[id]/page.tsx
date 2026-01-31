@@ -18,6 +18,7 @@ export default function WatchPage() {
     const [anime, setAnime] = useState<Anime | null>(null);
     const [loading, setLoading] = useState(true);
     const [inWatchlist, setInWatchlist] = useState(false);
+    const [visibleEpisodes, setVisibleEpisodes] = useState(24);
 
     useEffect(() => {
         if (!id) return;
@@ -161,7 +162,8 @@ export default function WatchPage() {
                 {/* Sidebar Column */}
                 <div className="space-y-8">
                     {/* Episodes List */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden flex flex-col h-[500px]">
+                    {/* Episodes List */}
+                    <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden flex flex-col h-[600px]">
                         <div className="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
                             <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
                                 <i className="fa-solid fa-list-ul text-brand-primary"></i>
@@ -169,24 +171,36 @@ export default function WatchPage() {
                             </h2>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-                            {anime.episodes ? Array.from({ length: anime.episodes }).map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleRedirect(i + 1)}
-                                    className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-brand-primary/10 hover:border-brand-primary/30 border border-transparent transition-all group/ep text-left"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 group-hover/ep:bg-brand-primary group-hover/ep:text-black transition-colors">
-                                            {i + 1}
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xs font-bold text-gray-300 group-hover/ep:text-white">Episode {i + 1}</span>
-                                            <span className="text-[10px] text-gray-600 uppercase tracking-widest group-hover/ep:text-brand-primary/70">Watch External</span>
-                                        </div>
-                                    </div>
-                                    <i className="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600 group-hover/ep:text-brand-primary"></i>
-                                </button>
-                            )) : (
+                            {anime.episodes ? (
+                                <>
+                                    {Array.from({ length: anime.episodes }).slice(0, visibleEpisodes).map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleRedirect(i + 1)}
+                                            className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-brand-primary/10 hover:border-brand-primary/30 border border-transparent transition-all group/ep text-left"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 group-hover/ep:bg-brand-primary group-hover/ep:text-black transition-colors">
+                                                    {i + 1}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-gray-300 group-hover/ep:text-white">Episode {i + 1}</span>
+                                                    <span className="text-[10px] text-gray-600 uppercase tracking-widest group-hover/ep:text-brand-primary/70">Watch External</span>
+                                                </div>
+                                            </div>
+                                            <i className="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600 group-hover/ep:text-brand-primary"></i>
+                                        </button>
+                                    ))}
+                                    {visibleEpisodes < anime.episodes && (
+                                        <button
+                                            onClick={() => setVisibleEpisodes(prev => prev + 24)}
+                                            className="w-full py-4 text-xs font-bold text-brand-primary uppercase tracking-widest hover:bg-white/5 rounded-xl transition-colors"
+                                        >
+                                            Load More Episodes
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
                                 <div className="p-6 text-center text-gray-500 text-xs font-bold uppercase tracking-widest">
                                     Episode count unknown
                                 </div>

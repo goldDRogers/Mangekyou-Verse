@@ -17,6 +17,8 @@ export default function HomePage() {
     const [topAiring, setTopAiring] = useState<Anime[]>([]);
     const [spotlight, setSpotlight] = useState<Anime[]>([]);
     const [trending, setTrending] = useState<Anime[]>([]);
+    const [newSeason, setNewSeason] = useState<Anime[]>([]);
+    const [upcoming, setUpcoming] = useState<Anime[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
@@ -27,15 +29,18 @@ export default function HomePage() {
         const fetchData = async () => {
             try {
                 // Fetch real Jikan data
-                const [spotlightData, trendingData, fullList] = await Promise.all([
+                const [spotlightData, trendingData, newData, upcomingData] = await Promise.all([
                     jikanService.getSpotlight(),
                     jikanService.getTrending(),
-                    jikanService.getSpotlight() // Reuse spotlight for latest/top airing for now 
+                    jikanService.getNewThisSeason(),
+                    jikanService.getUpcoming()
                 ]);
 
                 setSpotlight(spotlightData);
                 setTrending(trendingData);
-                setTopAiring(fullList.slice(2)); // Offset to avoid duplicate feeling
+                setNewSeason(newData);
+                setUpcoming(upcomingData);
+                setTopAiring(newData); // Fallback "Latest" to new season for now
             } catch (err) {
                 console.error("Failed to load content", err);
             } finally {
@@ -166,12 +171,42 @@ export default function HomePage() {
                 {/* 3. Trending Section */}
                 <section className="bg-[#0f1011] pt-16 pb-8 relative z-10">
                     <div className="max-w-[1920px] mx-auto">
-                        {trending.length > 0 && <TrendingCarousel items={trending} />}
+                        <TrendingCarousel items={trending} />
+                    </div>
+                </section>
+
+                {/* NEW: New This Season */}
+                <section className="py-12 border-t border-white/5">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                            <span className="w-1 h-8 bg-brand-secondary rounded-full"></span>
+                            New This Season
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+                        {newSeason.map(anime => (
+                            <AnimeCard key={anime.id} anime={anime} />
+                        ))}
+                    </div>
+                </section>
+
+                {/* NEW: Upcoming */}
+                <section className="py-12 border-t border-white/5">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                            <span className="w-1 h-8 bg-purple-500 rounded-full"></span>
+                            Upcoming Hype
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
+                        {upcoming.map(anime => (
+                            <AnimeCard key={anime.id} anime={anime} />
+                        ))}
                     </div>
                 </section>
 
                 {/* 4. Latest & Sidebar */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 py-12 border-t border-white/5">
                     {/* LEFT COLUMN */}
                     <div className="lg:col-span-3 space-y-16">
                         <section>

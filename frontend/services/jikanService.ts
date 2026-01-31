@@ -14,23 +14,22 @@ const mapJikanToAnime = (item: any): Anime => ({
     id: item.mal_id.toString(),
     title: item.title_english || item.title,
     description: item.synopsis || "No description available.",
-    thumbnail: item.images.webp.large_image_url || item.images.jpg.large_image_url,
+    thumbnail: item.images.webp?.large_image_url || item.images.jpg?.large_image_url,
     gallery: [
-        item.images.webp.large_image_url,
+        item.images.webp?.large_image_url,
         item.trailer?.images?.maximum_image_url,
-        ...(item.images.jpg.large_image_url ? [item.images.jpg.large_image_url] : [])
+        ...(item.images.jpg?.large_image_url ? [item.images.jpg.large_image_url] : [])
     ].filter(Boolean),
     rating: item.score || 0,
     episodes: item.episodes || 0,
     type: item.type,
     status: item.status === 'Currently Airing' ? 'Ongoing' : 'Completed',
-    genres: item.genres.map((g: any) => g.name).slice(0, 3)
+    genres: item.genres ? item.genres.map((g: any) => g.name).slice(0, 3) : []
 });
 
 export const jikanService = {
     getSpotlight: async (): Promise<Anime[]> => {
         try {
-            // Get top airing for spotlight
             const data = await fetchWithDelay(`${BASE_URL}/top/anime?filter=airing&limit=10`);
             return data.data.map(mapJikanToAnime);
         } catch (error) {
@@ -45,6 +44,26 @@ export const jikanService = {
             return data.data.map(mapJikanToAnime);
         } catch (error) {
             console.error("Jikan Trending Error:", error);
+            return [];
+        }
+    },
+
+    getNewThisSeason: async (): Promise<Anime[]> => {
+        try {
+            const data = await fetchWithDelay(`${BASE_URL}/seasons/now?limit=12`);
+            return data.data.map(mapJikanToAnime);
+        } catch (error) {
+            console.error("Jikan Season Error:", error);
+            return [];
+        }
+    },
+
+    getUpcoming: async (): Promise<Anime[]> => {
+        try {
+            const data = await fetchWithDelay(`${BASE_URL}/seasons/upcoming?limit=12`);
+            return data.data.map(mapJikanToAnime);
+        } catch (error) {
+            console.error("Jikan Upcoming Error:", error);
             return [];
         }
     },
