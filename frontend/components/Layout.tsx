@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
+import SearchAutocomplete from './SearchAutocomplete';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -85,19 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 bg-white/5 rounded-full px-4 py-2 w-72 border border-white/10 focus-within:border-brand-primary/50 transition-all group/navsearch">
-            <i className="fa-solid fa-user-ninja text-xs text-gray-700 group-focus-within/navsearch:text-brand-primary transition-colors"></i>
-            <input
-              type="text"
-              placeholder="Filter anime..."
-              className="bg-transparent border-none focus:outline-none w-full text-xs text-gray-300 placeholder:text-gray-600"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button type="submit" className="text-gray-500 hover:text-brand-primary transition-colors">
-              <i className="fa-solid fa-magnifying-glass text-xs"></i>
-            </button>
-          </form>
+          <SearchAutocomplete />
 
           {user ? (
             <div className="flex items-center gap-4">

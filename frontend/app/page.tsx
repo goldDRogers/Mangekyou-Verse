@@ -9,15 +9,14 @@ import SpotlightSlider from '@/components/home/SpotlightSlider';
 import TrendingCarousel from '@/components/home/TrendingCarousel';
 import Top10Sidebar from '@/components/home/Top10Sidebar';
 import ContinueWatching from '@/components/home/ContinueWatching';
-import { generateAnimeList } from '@/services/geminiService';
-import { getSpotlight, getTrending } from '@/services/animeService';
+import { jikanService } from '@/services/jikanService';
 import { Anime } from '@/types';
 import Link from 'next/link';
 
 export default function HomePage() {
     const [topAiring, setTopAiring] = useState<Anime[]>([]);
-    const [spotlight, setSpotlight] = useState<any[]>([]);
-    const [trending, setTrending] = useState<any[]>([]);
+    const [spotlight, setSpotlight] = useState<Anime[]>([]);
+    const [trending, setTrending] = useState<Anime[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
@@ -27,15 +26,16 @@ export default function HomePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                // Fetch real Jikan data
                 const [spotlightData, trendingData, fullList] = await Promise.all([
-                    getSpotlight(),
-                    getTrending(),
-                    generateAnimeList(18)
+                    jikanService.getSpotlight(),
+                    jikanService.getTrending(),
+                    jikanService.getSpotlight() // Reuse spotlight for latest/top airing for now 
                 ]);
 
                 setSpotlight(spotlightData);
                 setTrending(trendingData);
-                setTopAiring(fullList.slice(6));
+                setTopAiring(fullList.slice(2)); // Offset to avoid duplicate feeling
             } catch (err) {
                 console.error("Failed to load content", err);
             } finally {

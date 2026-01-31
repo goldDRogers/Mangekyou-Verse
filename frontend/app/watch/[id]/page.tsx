@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Layout from '@/components/Layout';
-import { getAnimeDetails } from '@/services/geminiService';
-import { getAnimeDetailsFromBackend, getEpisodes } from '@/services/animeService';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { jikanService } from '@/services/jikanService';
 import { historyService, watchlistService } from '@/services/watchlistService';
 import { Anime } from '@/types';
 import { motion } from 'framer-motion';
@@ -12,13 +10,14 @@ import { motion } from 'framer-motion';
 export default function WatchPage() {
     const params = useParams();
     const id = params ? params.id as string : '';
+    const searchParams = useSearchParams();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const initialEp = searchParams?.get('ep') ? parseInt(searchParams.get('ep')!) : 1;
+
     const router = useRouter();
     const [anime, setAnime] = useState<Anime | null>(null);
     const [loading, setLoading] = useState(true);
     const [inWatchlist, setInWatchlist] = useState(false);
-    const [currentEpisode, setCurrentEpisode] = useState(1);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         if (!id) return;
@@ -26,37 +25,19 @@ export default function WatchPage() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Try backend first
-                let data = await getAnimeDetailsFromBackend(id);
-
-                // If backend fails, try Gemini (fictional data)
-                if (!data) {
-                    data = await getAnimeDetails(id);
-                }
+                // Fetch real data from Jikan
+                const data = await jikanService.getAnimeDetails(id);
 
                 if (!data) {
                     router.push('/');
                     return;
                 }
                 setAnime(data);
-
                 const isSaved = await watchlistService.isInWatchlist(id);
                 setInWatchlist(isSaved);
 
-                // Try to get episodes from backend
-                const backendEpisodes = await getEpisodes(id);
-                if (backendEpisodes && backendEpisodes.length > 0) {
-                    // Update anime with real episodes if available
-                    setAnime(prev => prev ? { ...prev, episodes: backendEpisodes.length } : null);
-                }
-
-                // Try to get existing progress
-                const history = await historyService.getHistory();
-                const current = history.find((h: any) => h.anime_id === id);
-                if (current) {
-                    setCurrentEpisode(parseInt(current.episode_id) || 1);
-                    setProgress(current.progress_seconds || 0);
-                }
+                // Log history on visit
+                await historyService.updateProgress(id, '1', 0);
             } catch (err) {
                 console.error("Failed to fetch anime details", err);
             } finally {
@@ -78,11 +59,11 @@ export default function WatchPage() {
         }
     };
 
-    const handleEpisodeClick = (ep: number) => {
-        setCurrentEpisode(ep);
-        if (id) {
-            historyService.updateProgress(id, ep.toString(), 0);
-        }
+    const handleRedirect = (ep: number) => {
+        if (!anime) return;
+        const searchQuery = encodeURIComponent(`${anime.title} episode ${ep}`);
+        const url = `https://hianime.to/search?keyword=${searchQuery}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
     };
 
     if (loading) {
@@ -103,60 +84,52 @@ export default function WatchPage() {
                 <i className="fa-solid fa-chevron-right text-[8px]"></i>
                 <span className="text-gray-400">{anime.type}</span>
                 <i className="fa-solid fa-chevron-right text-[8px]"></i>
-                <span className="text-brand-primary">{anime.title}</span>
+                <span className="text-brand-primary line-clamp-1">{anime.title}</span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                {/* Player Column */}
-                <div className="lg:col-span-3 space-y-6">
-                    {/* Video Player Placeholder */}
+                {/* Main Content Column */}
+                <div className="lg:col-span-3 space-y-8">
+                    {/* "Player" / Redirect Card */}
                     <div className="aspect-video bg-black rounded-2xl overflow-hidden relative shadow-2xl border border-white/5 group">
                         <img
-                            src={anime.gallery ? anime.gallery[0] : anime.thumbnail}
-                            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                            alt="Player Background"
+                            src={anime.gallery ? anime.gallery[0] || anime.thumbnail : anime.thumbnail}
+                            className="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-700 blur-[2px]"
+                            alt="Background"
                         />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                className="w-24 h-24 rounded-full bg-brand-primary/20 backdrop-blur-md border border-brand-primary/50 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-[0_0_50px_rgba(183,148,244,0.3)]"
+                                className="mb-6"
                             >
-                                <i className="fa-solid fa-play text-4xl text-brand-primary animate-pulse"></i>
+                                <i className="fa-solid fa-shield-cat text-6xl text-brand-primary mb-4 opacity-80"></i>
                             </motion.div>
-                            <p className="mt-8 text-white/90 font-black uppercase tracking-[0.3em] text-[10px] bg-black/60 px-6 py-2 rounded-full backdrop-blur-md">
-                                Streaming Episode {currentEpisode}
+                            <h3 className="text-2xl font-black uppercase text-white mb-2 tracking-tight">
+                                Stream Hosted Externally
+                            </h3>
+                            <p className="text-gray-400 text-sm max-w-md mb-8 leading-relaxed">
+                                To ensure compliance with copyright regulations, Mangekyou Verse does not host video files. You will be redirected to a verified third-party provider.
                             </p>
-                        </div>
-
-                        {/* Controls Placeholder */}
-                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="flex items-center gap-6">
-                                <i className="fa-solid fa-play cursor-pointer hover:text-brand-primary transition-colors"></i>
-                                <i className="fa-solid fa-forward-step cursor-pointer hover:text-brand-primary transition-colors"></i>
-                                <div className="flex items-center gap-3">
-                                    <i className="fa-solid fa-volume-high text-xs opacity-50"></i>
-                                    <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
-                                        <div className="w-1/2 h-full bg-brand-primary"></div>
-                                    </div>
-                                </div>
-                                <span className="text-[10px] font-mono opacity-50">00:00 / 24:00</span>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <i className="fa-solid fa-gear cursor-pointer hover:text-brand-primary transition-colors text-xs"></i>
-                                <i className="fa-solid fa-expand cursor-pointer hover:text-brand-primary transition-colors text-xs"></i>
-                            </div>
+                            <button
+                                onClick={() => handleRedirect(1)}
+                                className="bg-brand-primary text-[#0f1011] px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 hover:bg-white transition-all shadow-lg shadow-brand-primary/20 flex items-center gap-3"
+                            >
+                                Continue to External Site <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                            </button>
                         </div>
                     </div>
 
                     {/* Info Section */}
                     <div className="bg-white/5 border border-white/5 rounded-3xl p-8 flex flex-col md:flex-row gap-8">
-                        <div className="w-32 h-48 rounded-xl overflow-hidden shadow-2xl flex-shrink-0 order-2 md:order-1 self-center md:self-start">
+                        <div className="w-40 h-60 rounded-xl overflow-hidden shadow-2xl flex-shrink-0 mx-auto md:mx-0">
                             <img src={anime.thumbnail} className="w-full h-full object-cover" alt={anime.title} />
                         </div>
-                        <div className="flex-1 order-1 md:order-2">
-                            <div className="flex flex-wrap items-center gap-3 mb-4">
-                                <span className="bg-brand-primary/20 text-brand-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{anime.status}</span>
+                        <div className="flex-1 text-center md:text-left">
+                            <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-4">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${anime.status === 'Ongoing' ? 'bg-green-500/20 text-green-400' : 'bg-brand-primary/20 text-brand-primary'}`}>
+                                    {anime.status}
+                                </span>
                                 <span className="bg-white/5 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{anime.type}</span>
                                 <div className="flex items-center gap-1.5 text-yellow-500 bg-yellow-500/10 px-3 py-1 rounded-full">
                                     <i className="fa-solid fa-star text-[10px]"></i>
@@ -164,24 +137,21 @@ export default function WatchPage() {
                                 </div>
                             </div>
                             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 leading-tight">
-                                {anime.title || 'Untitled Anime'}
+                                {anime.title}
                             </h1>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3 hover:line-clamp-none transition-all duration-500">
-                                {anime.description || 'No description available for this verse.'}
+                            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                                {anime.description}
                             </p>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
                                 <button
                                     onClick={handleToggleWatchlist}
-                                    className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${inWatchlist
+                                    className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all md:w-auto w-full ${inWatchlist
                                         ? 'bg-white/10 text-white hover:bg-white/20'
                                         : 'bg-brand-primary text-[#0f1011] hover:bg-[#cbb2f9]'
                                         }`}
                                 >
-                                    <i className={`fa-solid ${inWatchlist ? 'fa-check' : 'fa-plus'}`}></i>
+                                    <i className={`fa-solid ${inWatchlist ? 'fa-check' : 'fa-plus'} mr-2`}></i>
                                     {inWatchlist ? 'Watchlist' : 'Add to List'}
-                                </button>
-                                <button className="w-12 h-12 flex items-center justify-center rounded-full bg-white/5 text-white hover:text-brand-primary transition-colors border border-white/5">
-                                    <i className="fa-solid fa-share-nodes"></i>
                                 </button>
                             </div>
                         </div>
@@ -191,46 +161,36 @@ export default function WatchPage() {
                 {/* Sidebar Column */}
                 <div className="space-y-8">
                     {/* Episodes List */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden">
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <div className="bg-white/5 border border-white/5 rounded-3xl overflow-hidden flex flex-col h-[500px]">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
                             <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
                                 <i className="fa-solid fa-list-ul text-brand-primary"></i>
-                                Episodes
+                                Episodes ({anime.episodes || '?'})
                             </h2>
-                            <span className="text-[10px] font-black text-gray-500">1-{anime.episodes}</span>
                         </div>
-                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-4 gap-2 p-6 max-h-[400px] overflow-y-auto custom-scrollbar">
-                            {Array.from({ length: anime.episodes || 12 }).map((_, i) => {
-                                const ep = i + 1;
-                                const isActive = ep === currentEpisode;
-                                return (
-                                    <button
-                                        key={ep}
-                                        onClick={() => handleEpisodeClick(ep)}
-                                        className={`aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all ${isActive
-                                            ? 'bg-brand-primary text-[#0f1011] shadow-lg shadow-brand-primary/20 scale-105'
-                                            : 'bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white'
-                                            }`}
-                                    >
-                                        {ep}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Framer Shots (Gallery) */}
-                    <div className="bg-white/5 border border-white/5 rounded-3xl p-6">
-                        <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-3 mb-6">
-                            <i className="fa-solid fa-camera-retro text-brand-primary"></i>
-                            Framer Shots
-                        </h2>
-                        <div className="grid grid-cols-1 gap-4">
-                            {(anime.gallery || []).slice(1).map((shot, i) => (
-                                <div key={i} className="aspect-video rounded-xl overflow-hidden border border-white/5 group/shot">
-                                    <img src={shot} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Shot" />
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+                            {anime.episodes ? Array.from({ length: anime.episodes }).map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleRedirect(i + 1)}
+                                    className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-brand-primary/10 hover:border-brand-primary/30 border border-transparent transition-all group/ep text-left"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 group-hover/ep:bg-brand-primary group-hover/ep:text-black transition-colors">
+                                            {i + 1}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-gray-300 group-hover/ep:text-white">Episode {i + 1}</span>
+                                            <span className="text-[10px] text-gray-600 uppercase tracking-widest group-hover/ep:text-brand-primary/70">Watch External</span>
+                                        </div>
+                                    </div>
+                                    <i className="fa-solid fa-arrow-up-right-from-square text-xs text-gray-600 group-hover/ep:text-brand-primary"></i>
+                                </button>
+                            )) : (
+                                <div className="p-6 text-center text-gray-500 text-xs font-bold uppercase tracking-widest">
+                                    Episode count unknown
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 
@@ -242,7 +202,7 @@ export default function WatchPage() {
                         </h2>
                         <div className="flex flex-wrap gap-2">
                             {anime.genres.map(genre => (
-                                <span key={genre} className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 hover:bg-brand-primary/10 hover:text-brand-primary transition-all cursor-pointer border border-white/5">
+                                <span key={genre} className="px-4 py-2 bg-white/5 rounded-xl text-[10px] font-bold text-gray-400 border border-white/5">
                                     {genre}
                                 </span>
                             ))}

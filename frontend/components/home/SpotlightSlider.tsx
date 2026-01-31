@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Anime } from '../../types';
 
 interface SpotlightProps {
-    items: any[];
+    items: Anime[];
 }
 
 const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
@@ -14,100 +14,139 @@ const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
     const [paused, setPaused] = useState(false);
 
     useEffect(() => {
-        if (paused || items.length === 0) return;
+        if (paused || !items || items.length === 0) return;
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % items.length);
-        }, 5000);
+        }, 6000);
         return () => clearInterval(interval);
-    }, [paused, items.length]);
+    }, [paused, items]);
 
     const handleNext = () => setCurrentIndex((prev) => (prev + 1) % items.length);
     const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
 
-    if (items.length === 0) return null;
+    if (!items || items.length === 0) return null;
 
     const currentItem = items[currentIndex];
+    const bannerImage = currentItem.gallery?.[0] || currentItem.thumbnail;
 
     return (
         <div
-            className="relative h-[600px] w-full overflow-hidden bg-black group"
+            className="relative h-[550px] md:h-[700px] w-full overflow-hidden bg-black group"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
             <AnimatePresence mode='wait'>
                 <motion.div
                     key={currentItem.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.7 }}
+                    transition={{ duration: 0.8 }}
                     className="absolute inset-0"
                 >
-                    {/* Background Image */}
+                    {/* Background Image with Cinematic Blur */}
                     <div className="absolute inset-0">
-                        <img src={currentItem.banner} alt={currentItem.title} className="w-full h-full object-cover opacity-60" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#0f1011] via-[#0f1011]/60 to-transparent" />
+                        <img
+                            src={bannerImage}
+                            alt={currentItem.title}
+                            className="w-full h-full object-cover opacity-50 blur-[2px] scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#0f1011] via-[#0f1011]/70 to-transparent" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0f1011] via-transparent to-transparent" />
                     </div>
 
                     {/* Content */}
                     <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col justify-center">
                         <motion.div
-                            initial={{ y: 30, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3, duration: 0.5 }}
-                            className="max-w-2xl space-y-6"
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.6, staggerChildren: 0.1 }}
+                            className="max-w-3xl space-y-6"
                         >
-                            <div className="text-brand-primary font-black uppercase tracking-[0.3em] text-sm md:text-base flex items-center gap-3">
-                                <span className="text-4xl text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-purple-500 font-extrabold italic">#{currentItem.rank}</span> Spotlight
-                            </div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-brand-primary font-black uppercase tracking-[0.3em] text-xs md:text-sm flex items-center gap-3"
+                            >
+                                <span className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-purple-500 font-extrabold italic">
+                                    #{currentIndex + 1}
+                                </span>
+                                Spotlight
+                            </motion.div>
 
-                            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight line-clamp-2 uppercase tracking-tighter drop-shadow-lg">
+                            <motion.h2
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="text-3xl md:text-6xl font-black text-white leading-tight line-clamp-2 uppercase tracking-tighter drop-shadow-2xl"
+                            >
                                 {currentItem.title}
-                            </h2>
+                            </motion.h2>
 
-                            <div className="flex items-center gap-4 text-xs font-bold text-gray-300 uppercase tracking-widest">
-                                <span className="bg-white/10 px-3 py-1 rounded-sm border border-white/10"><i className="fa-solid fa-tv mr-2"></i>{currentItem.type}</span>
-                                <span className="bg-white/10 px-3 py-1 rounded-sm border border-white/10"><i className="fa-solid fa-clock mr-2"></i>{currentItem.duration}</span>
-                                <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-sm border border-green-500/20">{currentItem.quality}</span>
-                            </div>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex items-center gap-3 text-[10px] md:text-xs font-bold text-gray-300 uppercase tracking-widest"
+                            >
+                                <span className="bg-white/10 px-3 py-1.5 rounded-md border border-white/5 backdrop-blur-md">
+                                    <i className="fa-solid fa-tv mr-2 text-brand-primary"></i>{currentItem.type || 'TV'}
+                                </span>
+                                <span className="bg-white/10 px-3 py-1.5 rounded-md border border-white/5 backdrop-blur-md">
+                                    <i className="fa-solid fa-layer-group mr-2 text-brand-primary"></i>{currentItem.episodes ? `${currentItem.episodes} eps` : 'Unknown'}
+                                </span>
+                                <span className="bg-brand-primary/10 text-brand-primary px-3 py-1.5 rounded-md border border-brand-primary/20">
+                                    <i className="fa-solid fa-star mr-1"></i> {currentItem.rating}
+                                </span>
+                            </motion.div>
 
-                            <p className="text-gray-400 text-sm md:text-base leading-relaxed line-clamp-3 font-medium max-w-xl">
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-gray-400 text-xs md:text-sm leading-relaxed line-clamp-3 font-medium max-w-xl"
+                            >
                                 {currentItem.description}
-                            </p>
+                            </motion.p>
 
-                            <div className="flex items-center gap-4 pt-4">
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                className="flex items-center gap-4 pt-6"
+                            >
                                 <Link
                                     href={`/watch/${currentItem.id}`}
-                                    className="bg-brand-primary text-[#0f1011] px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center gap-3 shadow-lg shadow-brand-primary/20"
+                                    className="bg-brand-primary text-[#0f1011] px-8 py-3.5 rounded-full font-black uppercase tracking-widest text-xs hover:scale-105 transition-transform flex items-center gap-3 shadow-lg shadow-brand-primary/20 hover:bg-white"
                                 >
-                                    <i className="fa-solid fa-play"></i> Watch Now
+                                    <i className="fa-solid fa-circle-info"></i> View Details
                                 </Link>
-                                <Link
-                                    href={`/watch/${currentItem.id}`}
-                                    className="bg-white/5 border border-white/10 text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-md"
+                                <a
+                                    href={`https://hianime.to/search?keyword=${encodeURIComponent(currentItem.title)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-white/5 border border-white/10 text-white px-8 py-3.5 rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-md group/btn"
                                 >
-                                    Details <i className="fa-solid fa-chevron-right text-xs"></i>
-                                </Link>
-                            </div>
+                                    Watch Externally <i className="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover/btn:translate-x-1 transition-transform"></i>
+                                </a>
+                            </motion.div>
                         </motion.div>
                     </div>
                 </motion.div>
             </AnimatePresence>
 
             {/* Navigation Arrows */}
-            <button
-                onClick={handlePrev}
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-16 md:h-16 rounded-full border border-white/10 bg-black/50 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all opacity-0 group-hover:opacity-100 duration-300"
-            >
-                <i className="fa-solid fa-chevron-left text-xl"></i>
-            </button>
-            <button
-                onClick={handleNext}
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-16 md:h-16 rounded-full border border-white/10 bg-black/50 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all opacity-0 group-hover:opacity-100 duration-300"
-            >
-                <i className="fa-solid fa-chevron-right text-xl"></i>
-            </button>
+            <div className="absolute right-8 bottom-8 flex gap-4 z-20">
+                <button
+                    onClick={handlePrev}
+                    className="w-12 h-12 rounded-full border border-white/10 bg-black/40 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all backdrop-blur-md"
+                >
+                    <i className="fa-solid fa-chevron-left"></i>
+                </button>
+                <button
+                    onClick={handleNext}
+                    className="w-12 h-12 rounded-full border border-white/10 bg-black/40 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all backdrop-blur-md"
+                >
+                    <i className="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
     );
 };
