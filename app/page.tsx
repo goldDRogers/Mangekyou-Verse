@@ -51,12 +51,6 @@ export default function HomePage() {
         }
     };
 
-    const scrollToContent = () => {
-        if (contentRef.current) {
-            contentRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 bg-[#0f1011]">
@@ -137,15 +131,6 @@ export default function HomePage() {
                                     </button>
                                 ))}
                             </div>
-
-                            <button
-                                onClick={scrollToContent}
-                                className="group flex flex-col items-center gap-4 mt-8"
-                            >
-                                <div className="bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-12 py-5 rounded-full font-black text-xl uppercase tracking-[0.3em] transition-all transform hover:scale-[1.05] active:scale-95 shadow-[0_30px_70px_rgba(183,148,244,0.3)]">
-                                    Continue to Home
-                                </div>
-                            </button>
                         </div>
                     </div>
                 </div>

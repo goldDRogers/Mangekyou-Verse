@@ -95,12 +95,6 @@ const Home: React.FC = () => {
     }
   };
 
-  const scrollToContent = () => {
-    if (contentRef.current) {
-      contentRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 bg-brand-bg">
@@ -224,20 +218,6 @@ const Home: React.FC = () => {
                   </button>
                 ))}
               </div>
-
-              {/* Call to Action */}
-              <button
-                onClick={scrollToContent}
-                className="group flex flex-col items-center gap-4 mt-8"
-              >
-                <div className="bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-12 py-5 rounded-full font-black text-xl uppercase tracking-[0.3em] transition-all transform hover:scale-[1.05] active:scale-95 shadow-[0_30px_70px_rgba(183,148,244,0.3)]">
-                  Continue to Home
-                </div>
-                <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-brand-primary transition-colors animate-bounce mt-4">
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em]">Scroll Down</span>
-                  <i className="fa-solid fa-chevron-down text-lg"></i>
-                </div>
-              </button>
             </div>
           </div>
         </div>
