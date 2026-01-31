@@ -9,11 +9,7 @@ import SpotlightSlider from '@/components/home/SpotlightSlider';
 import TrendingCarousel from '@/components/home/TrendingCarousel';
 import Top10Sidebar from '@/components/home/Top10Sidebar';
 import ContinueWatching from '@/components/home/ContinueWatching';
-<<<<<<< HEAD:frontend/app/page.tsx
 import { jikanService } from '@/services/jikanService';
-=======
-import { getSpotlight, getTrending, getRecentAnime } from '@/services/animeService';
->>>>>>> 0acef9b8aaf31e920f2b12e23c3bc94e41ec6fe5:app/page.tsx
 import { Anime } from '@/types';
 import Link from 'next/link';
 
@@ -32,30 +28,19 @@ export default function HomePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-<<<<<<< HEAD:frontend/app/page.tsx
                 // Fetch real Jikan data
                 const [spotlightData, trendingData, newData, upcomingData] = await Promise.all([
                     jikanService.getSpotlight(),
                     jikanService.getTrending(),
                     jikanService.getNewThisSeason(),
                     jikanService.getUpcoming()
-=======
-                const [spotlightData, trendingData, recentData] = await Promise.all([
-                    getSpotlight(),
-                    getTrending(),
-                    getRecentAnime()
->>>>>>> 0acef9b8aaf31e920f2b12e23c3bc94e41ec6fe5:app/page.tsx
                 ]);
 
                 setSpotlight(spotlightData);
                 setTrending(trendingData);
-<<<<<<< HEAD:frontend/app/page.tsx
                 setNewSeason(newData);
                 setUpcoming(upcomingData);
                 setTopAiring(newData); // Fallback "Latest" to new season for now
-=======
-                setTopAiring(recentData.slice(0, 12)); // Show 12 recent anime
->>>>>>> 0acef9b8aaf31e920f2b12e23c3bc94e41ec6fe5:app/page.tsx
             } catch (err) {
                 console.error("Failed to load content", err);
             } finally {
@@ -69,6 +54,12 @@ export default function HomePage() {
         e.preventDefault();
         if (searchQuery.trim()) {
             router.push(`/search?q=${searchQuery}`);
+        }
+    };
+
+    const scrollToContent = () => {
+        if (contentRef.current) {
+            contentRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -221,7 +212,7 @@ export default function HomePage() {
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
                                 {topAiring.map(anime => (
-                                    <AnimeCard key={anime.id} anime={anime} malId={anime.malId} />
+                                    <AnimeCard key={anime.id} anime={anime} />
                                 ))}
                             </div>
                         </section>

@@ -114,18 +114,16 @@ const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
                             >
                                 <Link
                                     href={`/watch/${currentItem.id}`}
-                                    className="bg-brand-primary text-[#0f1011] px-8 py-3.5 rounded-full font-black uppercase tracking-widest text-xs hover:scale-105 transition-transform flex items-center gap-3 shadow-lg shadow-brand-primary/20 hover:bg-white"
+                                    className="bg-brand-primary text-[#0f1011] px-6 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-lg shadow-brand-primary/20 hover:bg-white"
                                 >
-                                    <i className="fa-solid fa-circle-info"></i> View Details
+                                    <i className="fa-solid fa-play"></i> Watch Now
                                 </Link>
-                                <a
-                                    href={`https://hianime.to/search?keyword=${encodeURIComponent(currentItem.title)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="bg-white/5 border border-white/10 text-white px-8 py-3.5 rounded-full font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-md group/btn"
+                                <Link
+                                    href={`/watch/${currentItem.id}`}
+                                    className="bg-transparent border border-white/20 text-white px-6 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white hover:text-black hover:border-white transition-all flex items-center gap-2 backdrop-blur-md"
                                 >
-                                    Watch Externally <i className="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover/btn:translate-x-1 transition-transform"></i>
-                                </a>
+                                    Details <i className="fa-solid fa-chevron-right text-xs"></i>
+                                </Link>
                             </motion.div>
                         </motion.div>
                     </div>
