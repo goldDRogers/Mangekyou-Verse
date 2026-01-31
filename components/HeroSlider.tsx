@@ -29,7 +29,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
         <img 
           src={activeItem.thumbnail} 
           alt={activeItem.title} 
-          className="w-full h-full object-cover scale-110 blur-2xl opacity-40 transition-all duration-[2000ms]"
+          className="w-full h-full object-cover scale-110 blur-2xl opacity-40 transition-all duration-[2000ms] anime-poster"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0f1011] via-[#0f1011]/80 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f1011] via-transparent to-transparent"></div>
@@ -81,7 +81,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
         
         {/* Large Floating Poster Image */}
         <div className="hidden lg:block ml-auto w-[400px] aspect-[3/4.5] rounded-[48px] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] border-4 border-white/10 transform rotate-3 hover:rotate-0 transition-all duration-[1500ms] group/poster relative">
-          <img src={activeItem.thumbnail} alt={activeItem.title} className="w-full h-full object-cover group-hover/poster:scale-110 transition-transform duration-[2000ms]" />
+          <img src={activeItem.thumbnail} alt={activeItem.title} className="w-full h-full object-cover group-hover/poster:scale-110 transition-transform duration-[2000ms] anime-poster" />
           <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover/poster:opacity-100 transition-opacity"></div>
         </div>
       </div>

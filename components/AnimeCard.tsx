@@ -34,7 +34,7 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime, showDetailsLink = true, ma
           <img
             src={anime.thumbnail}
             alt={anime.title}
-            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 anime-poster"
             loading="lazy"
             onError={handleImageError}
           />

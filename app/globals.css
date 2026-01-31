@@ -23,6 +23,22 @@
         background: #b794f4;
         border-radius: 10px;
     }
+
+    /* Global image smoothing */
+    img {
+        image-rendering: auto;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+    }
+
+    /* High quality image rendering for anime posters */
+    .anime-poster {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+    }
 }
 
 body {

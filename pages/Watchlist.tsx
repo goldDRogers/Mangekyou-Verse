@@ -57,7 +57,7 @@ const WatchlistComponent = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
                     {watchlist.map(item => (
                         <div key={item._id} className="group relative block aspect-[2/3] rounded-2xl overflow-hidden bg-gray-900 border border-white/10 hover:border-brand-primary transition-all shadow-xl">
-                            <img src={item.anime_poster || '/placeholder.jpg'} alt={item.anime_title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <img src={item.anime_poster || '/placeholder.jpg'} alt={item.anime_title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 anime-poster" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
                                 <h3 className="text-white font-black text-sm uppercase leading-tight line-clamp-2">{item.anime_title}</h3>
                                 <p className="text-brand-primary text-[10px] font-bold uppercase mt-2 bg-brand-primary/10 inline-block px-2 py-1 rounded border border-brand-primary/30 w-max">{item.status}</p>
