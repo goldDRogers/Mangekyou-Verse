@@ -67,12 +67,12 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ items }) => {
           <div className="flex flex-wrap gap-5 pt-4">
             <button 
               onClick={() => router.push(`/watch/${activeItem.id}`)}
-              className="group flex items-center gap-4 bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-10 py-5 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-110 active:scale-95 shadow-2xl shadow-brand-primary/30"
+              className="group flex items-center gap-4 bg-brand-primary hover:bg-[#cbb2f9] text-[#0f1011] px-8 py-3 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all transform hover:scale-110 active:scale-95 shadow-2xl shadow-brand-primary/30"
             >
               <i className="fa-solid fa-play-circle text-lg"></i>
               Watch Now
             </button>
-            <button className="flex items-center gap-4 bg-white/5 hover:bg-white/10 text-white px-10 py-5 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all border border-white/10 backdrop-blur-md">
+            <button className="flex items-center gap-4 bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-[24px] font-black uppercase tracking-widest text-xs transition-all border border-white/10 backdrop-blur-md">
               <i className="fa-solid fa-info-circle text-lg"></i>
               Detail
             </button>
