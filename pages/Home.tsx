@@ -7,9 +7,16 @@ import Top10Sidebar from '../components/home/Top10Sidebar';
 import Logo from '../components/Logo';
 import ParticleGrid from '../components/ParticleGrid';
 import { generateAnimeList } from '../services/geminiService';
-import { getSpotlight, getTrending } from '../services/animeService';
+import { getSpotlight, getTrending, searchAnime } from '../services/animeService';
 import { Anime } from '../types';
 import { useRouter } from 'next/router';
+
+type SearchSuggestion = {
+  id: string;
+  title: string;
+  thumbnail: string;
+  type?: string;
+};
 
 const Home: React.FC = () => {
   const [topAiring, setTopAiring] = useState<Anime[]>([]);
@@ -18,19 +25,59 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<SearchSuggestion[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Sample data for suggestions
-  const sampleSuggestions = [
-    { id: 'naruto-1', title: 'Road of Naruto', original: 'Road of Naruto', date: 'Oct 3, 2022', type: 'ONA', duration: '9m', thumbnail: 'https://picsum.photos/seed/n1/100/150' },
-    { id: 'boruto-1', title: 'Boruto: Naruto Next Generations', original: 'Boruto: Naruto Next Generations', date: 'Apr 5, 2017', type: 'TV', duration: '23m', thumbnail: 'https://picsum.photos/seed/b1/100/150' },
-    { id: 'naruto-2', title: 'Naruto: Find the Crimson Four-leaf Clover!', original: 'Naruto: Akaki Yotsuba no Clover wo Sagase', date: 'May 24, 2003', type: 'Special', duration: '17m', thumbnail: 'https://picsum.photos/seed/n2/100/150' },
-    { id: 'naruto-3', title: 'Naruto OVA5: Naruto, The Genie, and The Three Wishes!!', original: 'Naruto Soyokazeden Movie: Naruto to Mashin no...', date: 'Jul 31, 2010', type: 'OVA', duration: '14m', thumbnail: 'https://picsum.photos/seed/n3/100/150' },
-    { id: 'naruto-4', title: 'Naruto OVA3: Hidden Leaf Village Grand Sports Festival', original: 'Naruto: Dai Katsugeki!! Yuki Hime Shinobu...', date: 'Aug 21, 2004', type: 'Special', duration: '11m', thumbnail: 'https://picsum.photos/seed/n4/100/150' },
-  ];
+  const fuzzyScore = (query: string, text: string): number => {
+    const q = query.trim().toLowerCase();
+    const t = text.trim().toLowerCase();
+    if (!q) return Number.POSITIVE_INFINITY;
+    if (!t) return Number.POSITIVE_INFINITY;
+    if (t === q) return 0;
+    if (t.startsWith(q)) return 1;
+    const idx = t.indexOf(q);
+    if (idx !== -1) return 2 + idx;
+
+    // subsequence score (typo-tolerant-ish)
+    let ti = 0;
+    let hits = 0;
+    let gaps = 0;
+    for (let qi = 0; qi < q.length; qi++) {
+      const ch = q[qi];
+      const found = t.indexOf(ch, ti);
+      if (found === -1) return 9999;
+      gaps += found - ti;
+      hits++;
+      ti = found + 1;
+    }
+    return 10 + gaps + (q.length - hits) * 50;
+  };
+
+  const buildLocalSuggestions = (): SearchSuggestion[] => {
+    const mapAnime = (a: Anime): SearchSuggestion => ({
+      id: a.id,
+      title: a.title,
+      thumbnail: a.thumbnail,
+      type: a.type,
+    });
+
+    const localPool: Anime[] = [];
+    localPool.push(...(Array.isArray(spotlight) ? spotlight : []));
+    localPool.push(...(Array.isArray(trending) ? trending : []));
+    localPool.push(...(Array.isArray(topAiring) ? topAiring : []));
+
+    const seen = new Set<string>();
+    const unique: Anime[] = [];
+    for (const a of localPool) {
+      if (!a?.id || seen.has(a.id)) continue;
+      seen.add(a.id);
+      unique.push(a);
+    }
+
+    return unique.map(mapAnime);
+  };
 
   const topSearches = [
     "Jujutsu Kaisen: The Culling...",
@@ -66,15 +113,52 @@ const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const filtered = sampleSuggestions.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(true);
-    } else {
+    const q = searchQuery.trim();
+    if (!q) {
+      setFilteredSuggestions([]);
       setShowSuggestions(false);
+      return;
     }
+
+    // 1) instant local fuzzy results
+    const local = buildLocalSuggestions()
+      .map((s) => ({ s, score: fuzzyScore(q, s.title) }))
+      .filter((x) => x.score < 9999)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 6)
+      .map((x) => x.s);
+
+    setFilteredSuggestions(local);
+    setShowSuggestions(true);
+
+    // 2) debounced remote results (merge in)
+    const timer = setTimeout(async () => {
+      try {
+        const remote = await searchAnime(q);
+        const remoteSuggestions: SearchSuggestion[] = remote.slice(0, 8).map((a) => ({
+          id: a.id,
+          title: a.title,
+          thumbnail: a.thumbnail,
+          type: a.type,
+        }));
+
+        setFilteredSuggestions((prev) => {
+          const merged: SearchSuggestion[] = [];
+          const seen = new Set<string>();
+          for (const item of [...prev, ...remoteSuggestions]) {
+            if (!item?.id || seen.has(item.id)) continue;
+            seen.add(item.id);
+            merged.push(item);
+            if (merged.length >= 10) break;
+          }
+          return merged;
+        });
+      } catch (e) {
+        // ignore remote failures; local suggestions still work
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
   useEffect(() => {
@@ -90,9 +174,9 @@ const Home: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    if (contentRef.current) {
-      contentRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    const q = searchQuery.trim();
+    if (!q) return;
+    router.push(`/Search?q=${encodeURIComponent(q)}`);
   };
 
   if (loading) {
@@ -187,12 +271,6 @@ const Home: React.FC = () => {
                           <div className="flex items-start justify-between gap-4">
                             <h4 className="text-xl font-black text-white group-hover:text-brand-primary transition-colors leading-tight line-clamp-1">{item.title}</h4>
                             <span className="text-[10px] bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded font-black uppercase tracking-widest">{item.type}</span>
-                          </div>
-                          <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest line-clamp-1">{item.original}</p>
-                          <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 border-t border-white/5 pt-2">
-                            <span>{item.date}</span>
-                            <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                            <span>{item.duration}</span>
                           </div>
                         </div>
                       </div>

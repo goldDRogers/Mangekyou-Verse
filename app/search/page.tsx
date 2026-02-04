@@ -8,6 +8,29 @@ import { searchAnime } from '@/services/animeService';
 import { Anime } from '@/types';
 import { motion } from 'framer-motion';
 
+const fuzzyScore = (query: string, text: string): number => {
+    const q = query.trim().toLowerCase();
+    const t = (text || '').trim().toLowerCase();
+    if (!q) return Number.POSITIVE_INFINITY;
+    if (!t) return Number.POSITIVE_INFINITY;
+    if (t === q) return 0;
+    if (t.startsWith(q)) return 1;
+    const idx = t.indexOf(q);
+    if (idx !== -1) return 2 + idx;
+
+    let ti = 0;
+    let gaps = 0;
+    for (let qi = 0; qi < q.length; qi++) {
+        const ch = q[qi];
+        const found = t.indexOf(ch, ti);
+        if (found === -1) return 9999;
+        gaps += found - ti;
+        ti = found + 1;
+    }
+
+    return 10 + gaps;
+};
+
 function SearchResults() {
     const searchParams = useSearchParams();
     const query = searchParams ? searchParams.get('q') || '' : '';
@@ -23,7 +46,11 @@ function SearchResults() {
             setLoading(true);
             try {
                 const data = await searchAnime(query);
-                setResults(data);
+                const ranked = [...data]
+                    .map((a) => ({ a, score: fuzzyScore(query, a.title) }))
+                    .sort((x, y) => x.score - y.score)
+                    .map((x) => x.a);
+                setResults(ranked);
             } catch (err) {
                 console.error("Search failed", err);
             } finally {
