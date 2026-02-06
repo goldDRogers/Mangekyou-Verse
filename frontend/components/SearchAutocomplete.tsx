@@ -13,6 +13,8 @@ export default function SearchAutocomplete() {
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
+    const [activeIndex, setActiveIndex] = useState(-1);
+
     // Debounce for API calls
     const [debouncedQuery, setDebouncedQuery] = useState(query);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -29,13 +31,15 @@ export default function SearchAutocomplete() {
         const fetchResults = async () => {
             if (debouncedQuery.trim().length < 3) {
                 setResults([]);
+                setIsOpen(false);
                 return;
             }
             setIsLoading(true);
             try {
                 const data = await jikanService.searchAnime(debouncedQuery);
-                setResults(data);
+                setResults(data.slice(0, 10)); // Limit to 10 suggestions
                 setIsOpen(true);
+                setActiveIndex(-1);
             } catch (error) {
                 console.error("Search failed", error);
             } finally {
@@ -58,9 +62,29 @@ export default function SearchAutocomplete() {
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (activeIndex >= 0 && results[activeIndex]) {
+            router.push(`/watch/${results[activeIndex].id}`);
+            setIsOpen(false);
+            setQuery('');
+            return;
+        }
         if (query.trim()) {
             setIsOpen(false);
             router.push(`/search?q=${query}`);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!isOpen || results.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev < results.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveIndex(prev => (prev > 0 ? prev - 1 : prev));
+        } else if (e.key === 'Escape') {
+            setIsOpen(false);
         }
     };
 
@@ -82,6 +106,7 @@ export default function SearchAutocomplete() {
                     onFocus={() => {
                         if (results.length > 0) setIsOpen(true);
                     }}
+                    onKeyDown={handleKeyDown}
                 />
                 {isLoading && (
                     <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
@@ -99,7 +124,7 @@ export default function SearchAutocomplete() {
                         className="absolute mt-2 w-full bg-[#1c1d21] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl"
                     >
                         <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                            {results.map((anime) => (
+                            {results.map((anime, index) => (
                                 <Link
                                     key={anime.id}
                                     href={`/watch/${anime.id}`}
@@ -107,13 +132,13 @@ export default function SearchAutocomplete() {
                                         setIsOpen(false);
                                         setQuery('');
                                     }}
-                                    className="flex items-center gap-3 p-3 hover:bg-white/5 transition-colors group/item border-b border-white/5 last:border-0"
+                                    className={`flex items-center gap-3 p-3 transition-colors group/item border-b border-white/5 last:border-0 ${index === activeIndex ? 'bg-brand-primary/20 text-brand-primary' : 'hover:bg-white/5'}`}
                                 >
                                     <div className="w-10 h-14 bg-gray-800 rounded-md overflow-hidden flex-shrink-0">
                                         <img src={anime.thumbnail} alt={anime.title} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-xs font-bold text-gray-200 group-hover/item:text-brand-primary truncate transition-colors">
+                                        <h4 className={`text-xs font-bold truncate transition-colors ${index === activeIndex ? 'text-brand-primary' : 'text-gray-200 group-hover/item:text-brand-primary'}`}>
                                             {anime.title}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-1">
@@ -122,7 +147,7 @@ export default function SearchAutocomplete() {
                                             <span className="text-[10px] text-gray-500">{anime.status}</span>
                                         </div>
                                     </div>
-                                    <div className="text-[10px] font-bold text-gray-500 group-hover/item:text-white transition-colors">
+                                    <div className={`text-[10px] font-bold transition-colors ${index === activeIndex ? 'text-white' : 'text-gray-500 group-hover/item:text-white'}`}>
                                         <i className="fa-solid fa-star text-brand-primary mr-1"></i>
                                         {anime.rating}
                                     </div>
@@ -131,7 +156,7 @@ export default function SearchAutocomplete() {
                         </div>
                         <div className="p-2 bg-black/20 text-center border-t border-white/5">
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                Press Enter to see all results
+                                {activeIndex >= 0 ? 'Press Enter to select' : 'Arrow keys to navigate'}
                             </p>
                         </div>
                     </motion.div>

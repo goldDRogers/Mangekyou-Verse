@@ -9,12 +9,15 @@ interface AnimeCardProps {
   anime: Anime;
   showDetailsLink?: boolean;
   malId?: number; // MyAnimeList ID for better direct linking
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const AnimeCard: React.FC<AnimeCardProps> = ({ anime, showDetailsLink = true, malId }) => {
+const AnimeCard: React.FC<AnimeCardProps> = ({ anime, showDetailsLink = true, malId, size = 'md' }) => {
   const handleWatchClick = createWatchRedirectHandler(anime.title, malId);
   const externalSite = getExternalSiteInfo();
   const [imageError, setImageError] = React.useState(false);
+
+  const isSmall = size === 'sm';
 
   const handleImageError = () => {
     setImageError(true);
@@ -68,7 +71,7 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime, showDetailsLink = true, ma
           >
             <i className={`${externalSite?.icon || 'fa-solid fa-external-link-alt'} text-lg`}></i>
           </button>
-          
+
           {/* External Site Label */}
           <div className="text-center mb-3">
             <span className="text-[10px] text-gray-400 uppercase tracking-wider">
@@ -89,16 +92,16 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime, showDetailsLink = true, ma
       <div className="mt-3">
         {showDetailsLink ? (
           <Link href={`/watch/${anime.id}`} className="block">
-            <h3 className="text-sm font-bold text-gray-100 group-hover:text-brand-accent transition-colors line-clamp-1">
+            <h3 className={`${isSmall ? 'text-[11px]' : 'text-sm'} font-bold text-gray-100 group-hover:text-brand-accent transition-colors line-clamp-1`}>
               {anime.title}
             </h3>
           </Link>
         ) : (
-          <h3 className="text-sm font-bold text-gray-100 line-clamp-1">
+          <h3 className={`${isSmall ? 'text-[11px]' : 'text-sm'} font-bold text-gray-100 line-clamp-1`}>
             {anime.title}
           </h3>
         )}
-        <p className="text-[11px] text-gray-500 mt-1">
+        <p className={`${isSmall ? 'text-[9px]' : 'text-[11px]'} text-gray-500 mt-1`}>
           {anime.status} • {anime.type}
         </p>
       </div>

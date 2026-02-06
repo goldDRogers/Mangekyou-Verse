@@ -12,6 +12,7 @@ import ContinueWatching from '@/components/home/ContinueWatching';
 import { jikanService } from '@/services/jikanService';
 import { Anime } from '@/types';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { SpotlightSkeleton, CarouselSkeleton, AnimeCardSkeleton } from '@/components/ui/Skeleton';
 
 export default function HomePage() {
@@ -20,7 +21,11 @@ export default function HomePage() {
     const [trending, setTrending] = useState<Anime[]>([]);
     const [newSeason, setNewSeason] = useState<Anime[]>([]);
     const [upcoming, setUpcoming] = useState<Anime[]>([]);
+    const [recommended, setRecommended] = useState<Anime[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [latestPage, setLatestPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
     const contentRef = useRef<HTMLDivElement>(null);
@@ -41,7 +46,13 @@ export default function HomePage() {
                 setTrending(trendingData);
                 setNewSeason(newData);
                 setUpcoming(upcomingData);
-                setTopAiring(newData); // Fallback "Latest" to new season for now
+                setTopAiring(newData);
+
+                // Fetch recommendations based on the top trending item for "Recommended For You" section
+                if (trendingData.length > 0) {
+                    const recommendationsData = await jikanService.getRecommendations(trendingData[0].id);
+                    setRecommended(recommendationsData);
+                }
             } catch (err) {
                 console.error("Failed to load content", err);
             } finally {
@@ -50,6 +61,22 @@ export default function HomePage() {
         };
         fetchData();
     }, []);
+
+    const loadMoreLatest = async () => {
+        if (loadingMore || !hasNextPage) return;
+        setLoadingMore(true);
+        try {
+            const nextP = latestPage + 1;
+            const response = await jikanService.getTopAnime('airing', nextP);
+            setTopAiring(prev => [...prev, ...response.data]);
+            setLatestPage(nextP);
+            setHasNextPage(response.pagination.hasNextPage);
+        } catch (err) {
+            console.error("Failed to load more episodes", err);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -167,6 +194,31 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* NEW: Recommended For You */}
+                {recommended.length > 0 && (
+                    <section className="py-12 border-t border-white/5">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                                <span className="w-1 h-8 bg-brand-primary rounded-full shadow-[0_0_15px_rgba(183,148,244,0.5)]"></span>
+                                Recommended For You
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                            {recommended.slice(0, 6).map((anime, i) => (
+                                <motion.div
+                                    key={`rec-${anime.id}`}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                >
+                                    <AnimeCard anime={anime} />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {/* NEW: New This Season */}
                 <section className="py-12 border-t border-white/5">
                     <div className="flex items-center justify-between mb-8">
@@ -175,9 +227,17 @@ export default function HomePage() {
                             New This Season
                         </h2>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
-                        {newSeason.map(anime => (
-                            <AnimeCard key={anime.id} anime={anime} />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-10">
+                        {newSeason.map((anime, i) => (
+                            <motion.div
+                                key={`new-${anime.id}`}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.05 }}
+                            >
+                                <AnimeCard anime={anime} />
+                            </motion.div>
                         ))}
                     </div>
                 </section>
@@ -207,15 +267,40 @@ export default function HomePage() {
                                     <span className="w-1 h-8 bg-brand-primary rounded-full"></span>
                                     Latest Episodes
                                 </h2>
-                                <button className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
-                                    View All <i className="fa-solid fa-chevron-right ml-1 text-brand-primary"></i>
-                                </button>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-10">
-                                {topAiring.map(anime => (
-                                    <AnimeCard key={anime.id} anime={anime} />
+                                {topAiring.map((anime, i) => (
+                                    <motion.div
+                                        key={`top-${anime.id}-${i}`}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                    >
+                                        <AnimeCard anime={anime} />
+                                    </motion.div>
                                 ))}
                             </div>
+
+                            {hasNextPage && (
+                                <div className="mt-12 flex justify-center">
+                                    <button
+                                        onClick={loadMoreLatest}
+                                        disabled={loadingMore}
+                                        className="bg-white/5 hover:bg-brand-primary hover:text-black px-12 py-4 rounded-full text-xs font-black uppercase tracking-[0.3em] transition-all border border-white/10 hover:border-brand-primary/50 shadow-xl disabled:opacity-50 flex items-center gap-3"
+                                    >
+                                        {loadingMore ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                                Loading Node...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Initialize More Data <i className="fa-solid fa-chevron-down"></i>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
                         </section>
                     </div>
 
@@ -223,8 +308,12 @@ export default function HomePage() {
                     <div className="lg:col-span-1 space-y-12">
                         {trending.length > 0 && <Top10Sidebar items={trending} />}
 
-                        <div className="bg-[#121315] p-8 rounded-[32px] border border-white/5 shadow-2xl">
-                            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] mb-6 border-b border-white/10 pb-4">Explore Genres</h3>
+                        <div className="bg-[#121315] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 blur-3xl -z-10 group-hover:bg-brand-primary/10 transition-all"></div>
+                            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] mb-6 border-b border-white/10 pb-4 flex items-center gap-2">
+                                <i className="fa-solid fa-fire-flame-curved text-brand-primary"></i>
+                                Explore Genres
+                            </h3>
                             <div className="grid grid-cols-2 gap-3">
                                 {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Isekai', 'Sci-Fi', 'Seinen', 'Shounen'].map(genre => (
                                     <Link key={genre} href={`/search?q=${genre}`} className="text-[10px] font-bold text-gray-500 hover:text-brand-primary hover:bg-white/5 border border-white/5 hover:border-brand-primary/20 px-3 py-2 rounded-xl transition-all truncate text-center uppercase tracking-widest">
