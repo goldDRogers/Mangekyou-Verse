@@ -1,9 +1,5 @@
-import { redirect } from 'next/navigation';
+"use client";
 
-<<<<<<< HEAD:app/page.tsx
-export default function Page() {
-  redirect('/Home');
-=======
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
@@ -16,6 +12,7 @@ import ContinueWatching from '@/components/home/ContinueWatching';
 import { jikanService } from '@/services/jikanService';
 import { Anime } from '@/types';
 import Link from 'next/link';
+import { SpotlightSkeleton, CarouselSkeleton, AnimeCardSkeleton } from '@/components/ui/Skeleton';
 
 export default function HomePage() {
     const [topAiring, setTopAiring] = useState<Anime[]>([]);
@@ -241,5 +238,4 @@ export default function HomePage() {
             </div>
         </div>
     );
->>>>>>> 0179a403f6d598cf00617317b350563c75d4ab23:frontend/app/page.tsx
 }

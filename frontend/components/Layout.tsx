@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 import SearchAutocomplete from './SearchAutocomplete';
+import BackToTop from './ui/BackToTop';
+import MobileBottomNav from './ui/MobileBottomNav';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -164,6 +166,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <p className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">© 2026 MANGEKYOU VERSE Collective. All Rights Reserved.</p>
         </div>
       </footer>
+
+      {/* Floating UI Elements */}
+      <BackToTop />
+      <MobileBottomNav />
     </div>
   );
 };
