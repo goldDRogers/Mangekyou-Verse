@@ -114,13 +114,13 @@ const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
                             >
                                 <Link
                                     href={`/watch/${currentItem.id}`}
-                                    className="bg-brand-primary text-[#0f1011] px-6 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-lg shadow-brand-primary/20 hover:bg-white"
+                                    className="bg-gradient-to-r from-brand-primary to-fuchsia-500 text-[#0f1011] px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 hover:shadow-[0_0_30px_rgba(183,148,244,0.5)] transition-all flex items-center gap-2 shadow-lg group"
                                 >
-                                    <i className="fa-solid fa-play"></i> Watch Now
+                                    <i className="fa-solid fa-play group-hover:animate-pulse"></i> Watch Now
                                 </Link>
                                 <Link
                                     href={`/watch/${currentItem.id}`}
-                                    className="bg-transparent border border-white/20 text-white px-6 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white hover:text-black hover:border-white transition-all flex items-center gap-2 backdrop-blur-md"
+                                    className="bg-white/5 border border-white/10 text-white px-8 py-3 rounded-full font-black uppercase tracking-widest text-sm hover:bg-white hover:text-black hover:border-white transition-all flex items-center gap-2 backdrop-blur-md"
                                 >
                                     Details <i className="fa-solid fa-chevron-right text-xs"></i>
                                 </Link>
@@ -130,20 +130,44 @@ const SpotlightSlider: React.FC<SpotlightProps> = ({ items }) => {
                 </motion.div>
             </AnimatePresence>
 
-            {/* Navigation Arrows */}
-            <div className="absolute right-8 bottom-8 flex gap-4 z-20">
-                <button
-                    onClick={handlePrev}
-                    className="w-12 h-12 rounded-full border border-white/10 bg-black/40 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all backdrop-blur-md"
-                >
-                    <i className="fa-solid fa-chevron-left"></i>
-                </button>
-                <button
-                    onClick={handleNext}
-                    className="w-12 h-12 rounded-full border border-white/10 bg-black/40 text-white flex items-center justify-center hover:bg-brand-primary hover:text-black hover:border-brand-primary transition-all backdrop-blur-md"
-                >
-                    <i className="fa-solid fa-chevron-right"></i>
-                </button>
+            {/* NEW: Edge-Reveal Navigation Arrows */}
+            <AnimatePresence>
+                {paused && (
+                    <>
+                        <motion.button
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            onClick={handlePrev}
+                            className="absolute left-6 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-black/40 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white/50 hover:text-brand-primary hover:border-brand-primary transition-all shadow-2xl group/arrow"
+                        >
+                            <i className="fa-solid fa-chevron-left text-2xl group-hover/arrow:scale-110 transition-transform"></i>
+                        </motion.button>
+                        <motion.button
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            onClick={handleNext}
+                            className="absolute right-6 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-black/40 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white/50 hover:text-brand-primary hover:border-brand-primary transition-all shadow-2xl group/arrow"
+                        >
+                            <i className="fa-solid fa-chevron-right text-2xl group-hover/arrow:scale-110 transition-transform"></i>
+                        </motion.button>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Global Spotlight Progress Bar */}
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/5 flex gap-1 px-1">
+                {items.map((_, idx) => (
+                    <div key={idx} className="flex-1 h-full rounded-full overflow-hidden bg-white/5">
+                        <motion.div
+                            className="h-full bg-brand-primary shadow-[0_0_15px_rgba(183,148,244,0.5)]"
+                            initial={{ width: 0 }}
+                            animate={{ width: currentIndex === idx ? '100%' : currentIndex > idx ? '100%' : '0%' }}
+                            transition={{ duration: currentIndex === idx ? 6 : 0.3, ease: 'linear' }}
+                        />
+                    </div>
+                ))}
             </div>
         </div>
     );

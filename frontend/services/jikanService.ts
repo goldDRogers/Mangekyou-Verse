@@ -2,25 +2,52 @@ import { Anime } from '../types';
 
 const BASE_URL = 'https://api.jikan.moe/v4';
 
-// Rate limit handling helper with retry logic
-const fetchWithDelay = async (url: string, retries = 2): Promise<any> => {
-    await new Promise(resolve => setTimeout(resolve, 350)); // Jikan rate limit buffer
-    try {
-        const res = await fetch(url, { next: { revalidate: 3600 } });
-        if (res.status === 429 && retries > 0) {
-            // Rate limited, wait longer and retry
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return fetchWithDelay(url, retries - 1);
-        }
-        if (!res.ok) throw new Error(`Jikan API Error: ${res.statusText}`);
-        return res.json();
-    } catch (error) {
-        if (retries > 0) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            return fetchWithDelay(url, retries - 1);
-        }
-        throw error;
-    }
+// Global queue to handle rate limiting across parallel calls
+let requestQueue: Promise<any> = Promise.resolve();
+
+const fetchWithDelay = async (url: string, retries = 3, backoff = 1500): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        requestQueue = requestQueue
+            .catch(() => { }) // Prevent previous failures from breaking the chain
+            .then(async () => {
+                // Jikan rate limit is tight (3 req/sec). 700ms is stable and faster.
+                await new Promise(r => setTimeout(r, 700));
+
+                try {
+                    const res = await fetch(url, {
+                        next: { revalidate: 3600 },
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (res.status === 429) {
+                        console.warn(`[Jikan API] Rate limited (429) for ${url}. Handing back to retry loop...`);
+                        throw new Error('API_RATE_LIMIT');
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(`API_ERROR_${res.status}`);
+                    }
+
+                    const data = await res.json();
+                    resolve(data);
+                } catch (error: any) {
+                    if (retries > 0 && (error.message === 'API_RATE_LIMIT' || error.message.includes('500'))) {
+                        console.log(`[Jikan API] Retrying ${url} (${retries} left)...`);
+                        await new Promise(r => setTimeout(r, backoff));
+                        // Recursive call inside the queue context
+                        try {
+                            const retryResult = await fetchWithDelay(url, retries - 1, backoff * 1.5);
+                            resolve(retryResult);
+                        } catch (retryErr) {
+                            reject(retryErr);
+                        }
+                    } else {
+                        console.error(`[Jikan API] Final Failure for ${url}:`, error.message);
+                        reject(error);
+                    }
+                }
+            });
+    });
 };
 
 const mapJikanToAnime = (item: any): Anime => ({
@@ -59,6 +86,7 @@ export interface SearchFilters {
     type?: 'tv' | 'movie' | 'ova' | 'ona' | 'special';
     orderBy?: 'popularity' | 'score' | 'title' | 'start_date' | 'episodes';
     sort?: 'asc' | 'desc';
+    minScore?: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -175,6 +203,7 @@ export const jikanService = {
                 params.append('order_by', filters.orderBy);
                 params.append('sort', filters.sort || 'desc');
             }
+            if (filters.minScore) params.append('min_score', filters.minScore.toString());
 
             const data = await fetchWithDelay(`${BASE_URL}/anime?${params.toString()}`);
 
@@ -271,6 +300,31 @@ export const jikanService = {
             return data.data.slice(0, 12).map((rec: any) => mapJikanToAnime(rec.entry));
         } catch (error) {
             console.error("Jikan Recommendations Error:", error);
+            return [];
+        }
+    },
+
+    // Get smart recommendations based on genres and popularity
+    getGenreBasedSimilarAnime: async (genres: string[], excludeId?: string): Promise<Anime[]> => {
+        try {
+            const genreIds = genres
+                .map(name => ANIME_GENRES.find(g => g.name.toLowerCase() === name.toLowerCase())?.id)
+                .filter(Boolean);
+
+            if (genreIds.length === 0) return [];
+
+            // Fetch top anime in these genres
+            const data = await fetchWithDelay(
+                `${BASE_URL}/anime?genres=${genreIds.slice(0, 3).join(',')}&order_by=popularity&sort=desc&limit=12&sfw=true`
+            );
+
+            let results = data.data.map(mapJikanToAnime);
+            if (excludeId) {
+                results = results.filter(a => a.id !== excludeId);
+            }
+            return results;
+        } catch (error) {
+            console.error("Jikan Genre Based Similar Error:", error);
             return [];
         }
     },

@@ -5,7 +5,7 @@ import { Anime } from '../types';
 const convertJikanToAnime = (jikanAnime: JikanAnime): Anime | null => {
     // Add null check
     if (!jikanAnime) return null;
-    
+
     // Map Jikan type to our type
     const mapType = (type: string): 'TV' | 'Movie' | 'OVA' | 'ONA' | 'Special' => {
         switch (type?.toLowerCase()) {
@@ -30,9 +30,9 @@ const convertJikanToAnime = (jikanAnime: JikanAnime): Anime | null => {
     }
 
     // Get thumbnail with fallback
-    const thumbnail = jikanAnime.images?.jpg?.image_url || 
-                     jikanAnime.images?.webp?.image_url ||
-                     `https://picsum.photos/seed/anime-${jikanAnime.mal_id}/400/600.jpg`;
+    const thumbnail = jikanAnime.images?.jpg?.image_url ||
+        jikanAnime.images?.webp?.image_url ||
+        `https://picsum.photos/seed/anime-${jikanAnime.mal_id}/400/600.jpg`;
 
     // Debug logging
     console.log('Anime data:', {
@@ -66,10 +66,10 @@ export const getSpotlight = async () => {
         console.log('Fetching spotlight anime...');
         const spotlightAnime = await jikanService.getSpotlightAnime();
         console.log('Raw spotlight data:', spotlightAnime);
-        
+
         const converted = spotlightAnime.map(convertJikanToAnime).filter((anime): anime is Anime => anime !== null);
         console.log('Converted spotlight data:', converted);
-        
+
         return converted;
     } catch (e) {
         console.error("Failed to get spotlight", e);
@@ -102,7 +102,7 @@ export const getAnimeDetailsFromBackend = async (id: string): Promise<Anime | nu
     try {
         const jikanAnime = await jikanService.getAnimeDetails(parseInt(id));
         if (!jikanAnime) return null;
-        
+
         return convertJikanToAnime(jikanAnime);
     } catch (e) {
         console.error("Failed to get anime details", e);
@@ -115,14 +115,9 @@ export const getEpisodes = async (id: string) => {
         const episodes = await jikanService.getAnimeEpisodes(parseInt(id));
         return episodes.map((episode, index) => ({
             id: episode.mal_id.toString(),
-            anime_id: id,
-            episode_number: index + 1,
+            animeId: id,
+            number: index + 1,
             title: episode.title || `Episode ${index + 1}`,
-            description: `Episode ${index + 1} of the anime series.`,
-            duration_seconds: 1440, // 24 minutes default
-            video_url: `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`,
-            created_at: new Date().toISOString(),
-            thumbnail: `https://picsum.photos/seed/episode-${id}-${index}/320/180.jpg`
         }));
     } catch (e) {
         console.error("Failed to get episodes", e);

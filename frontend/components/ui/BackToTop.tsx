@@ -37,20 +37,22 @@ export const BackToTop: React.FC = () => {
                     transition={{ duration: 0.2 }}
                     onClick={scrollToTop}
                     className="
-                        fixed bottom-8 right-8 z-50
+                        fixed bottom-8 right-8 z-[100]
                         w-14 h-14 rounded-full
-                        bg-brand-primary text-black
+                        bg-brand-primary text-white
                         flex items-center justify-center
-                        shadow-[0_0_30px_rgba(183,148,244,0.5)]
-                        hover:shadow-[0_0_50px_rgba(183,148,244,0.8)]
+                        shadow-[0_0_40px_rgba(183,148,244,0.6)]
+                        hover:shadow-[0_0_60px_rgba(183,148,244,0.9)]
+                        hover:bg-brand-secondary
                         hover:scale-110
                         active:scale-95
                         transition-all duration-300
                         group
+                        animate-pulse-glow
                     "
                     aria-label="Back to top"
                 >
-                    <ArrowUp className="w-6 h-6 group-hover:animate-bounce" />
+                    <ArrowUp className="w-7 h-7 group-hover:animate-bounce" />
                 </motion.button>
             )}
         </AnimatePresence>

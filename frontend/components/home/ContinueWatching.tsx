@@ -5,6 +5,7 @@ import { historyService } from '@/services/watchlistService';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import AnimeCarousel from '../ui/AnimeCarousel';
 
 export default function ContinueWatching() {
     const { user } = useAuth();
@@ -31,31 +32,24 @@ export default function ContinueWatching() {
     if (!user || (!loading && history.length === 0)) return null;
 
     return (
-        <section className="mt-12 px-4 md:px-0">
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                    <span className="w-1 h-8 bg-brand-primary rounded-full"></span>
-                    Continue Watching
-                </h2>
-                <Link href="/history" className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors">
-                    Full History <i className="fa-solid fa-arrow-right ml-2 text-brand-primary"></i>
-                </Link>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-                {loading ? (
-                    Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="aspect-video bg-[#1c1d21] rounded-2xl animate-pulse"></div>
-                    ))
-                ) : (
-                    history.map((item) => (
+        <AnimeCarousel
+            title="Continue Watching"
+            icon={<span className="w-1 h-8 bg-brand-primary rounded-full"></span>}
+            viewAllLink="/history"
+        >
+            {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="w-[200px] md:w-[300px] aspect-video bg-[#1c1d21] rounded-2xl animate-pulse"></div>
+                ))
+            ) : (
+                history.map((item) => (
+                    <div key={`${item.anime.id}-${item.episode}`} className="w-[200px] md:w-[320px]">
                         <Link
-                            key={`${item.anime.id}-${item.episode}`}
                             href={`/watch/${item.anime.id}?ep=${item.episode}`}
-                            className="group relative"
+                            className="group relative block"
                         >
                             <motion.div
-                                whileHover={{ scale: 1.05 }}
+                                whileHover={{ scale: 1.02 }}
                                 className="relative aspect-video rounded-2xl overflow-hidden bg-[#1c1d21] border border-white/5 group-hover:border-brand-primary/30 transition-all shadow-2xl"
                             >
                                 {/* Poster with Blur Overlay */}
@@ -89,9 +83,9 @@ export default function ContinueWatching() {
                                 </p>
                             </div>
                         </Link>
-                    ))
-                )}
-            </div>
-        </section>
+                    </div>
+                ))
+            )}
+        </AnimeCarousel>
     );
 }

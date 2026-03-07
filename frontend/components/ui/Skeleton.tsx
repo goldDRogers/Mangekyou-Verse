@@ -12,26 +12,38 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className }) => (
 );
 
 // Anime Card Skeleton
-export const AnimeCardSkeleton: React.FC = () => (
-    <div className="group block relative">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-brand-card border border-white/5">
-            <Skeleton className="w-full h-full rounded-xl" />
-            {/* Badge placeholders */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                <Skeleton className="w-10 h-4 rounded" />
-                <Skeleton className="w-12 h-4 rounded" />
+export const AnimeCardSkeleton: React.FC<{ count?: number }> = ({ count = 1 }) => {
+    if (count > 1) {
+        return (
+            <>
+                {Array.from({ length: count }).map((_, i) => (
+                    <AnimeCardSkeleton key={i} />
+                ))}
+            </>
+        );
+    }
+
+    return (
+        <div className="group block relative">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-brand-card border border-white/5">
+                <Skeleton className="w-full h-full rounded-xl" />
+                {/* Badge placeholders */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    <Skeleton className="w-10 h-4 rounded" />
+                    <Skeleton className="w-12 h-4 rounded" />
+                </div>
+                {/* Rating placeholder */}
+                <div className="absolute top-2 right-2 z-10">
+                    <Skeleton className="w-10 h-5 rounded" />
+                </div>
             </div>
-            {/* Rating placeholder */}
-            <div className="absolute top-2 right-2 z-10">
-                <Skeleton className="w-10 h-5 rounded" />
+            <div className="mt-4 space-y-3">
+                <Skeleton className="h-4 w-3/4 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
             </div>
         </div>
-        <div className="mt-3 space-y-2">
-            <Skeleton className="h-4 w-3/4 rounded" />
-            <Skeleton className="h-3 w-1/2 rounded" />
-        </div>
-    </div>
-);
+    );
+};
 
 // Spotlight Skeleton
 export const SpotlightSkeleton: React.FC = () => (

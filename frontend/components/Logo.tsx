@@ -4,16 +4,19 @@ import React from 'react';
 interface LogoProps {
   className?: string;
   glow?: boolean;
+  variant?: 'default' | 'spinning' | 'pulse';
 }
 
-const Logo: React.FC<LogoProps> = ({ className = "w-12 h-12", glow = true }) => {
+const Logo: React.FC<LogoProps> = ({ className = "w-12 h-12", glow = true, variant = 'default' }) => {
+  const animationClass = variant === 'spinning' ? 'animate-spin-slow' : variant === 'pulse' ? 'animate-pulse-glow' : '';
+
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative flex items-center justify-center ${className} ${animationClass}`}>
       {/* Outer Glow Effect */}
       {glow && (
-        <div className="absolute inset-0 rounded-full bg-brand-primary/30 blur-xl animate-pulse-glow"></div>
+        <div className={`absolute inset-0 rounded-full bg-brand-primary/30 blur-xl ${variant !== 'spinning' ? 'animate-pulse-glow' : ''}`}></div>
       )}
-      
+
       <svg
         viewBox="0 0 100 100"
         fill="none"
@@ -27,7 +30,7 @@ const Logo: React.FC<LogoProps> = ({ className = "w-12 h-12", glow = true }) => 
             <stop offset="70%" stopColor="#5a2e98" />
             <stop offset="100%" stopColor="#0f1011" />
           </radialGradient>
-          
+
           <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
             <stop offset="85%" stopColor="transparent" />
             <stop offset="100%" stopColor="#b794f4" stopOpacity="0.6" />
@@ -72,7 +75,7 @@ const Logo: React.FC<LogoProps> = ({ className = "w-12 h-12", glow = true }) => 
             <use href="#tomoe" transform="translate(0, -30) scale(0.8)" />
           </g>
         </g>
-        
+
         {/* Reflection Highlight */}
         <circle cx="35" cy="35" r="2" fill="white" fillOpacity="0.6" />
       </svg>

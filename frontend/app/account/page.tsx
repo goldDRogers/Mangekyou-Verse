@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import AccountClient from './AccountClient';
 
 export default function Page() {
-  redirect('/');
+  return <AccountClient />;
 }

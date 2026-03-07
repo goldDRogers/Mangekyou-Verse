@@ -80,10 +80,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Home</Link>
-            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Movies</Link>
-            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">TV Series</Link>
-            <Link href="/" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Most Popular</Link>
+            <Link href="/" className="text-xs font-black text-white transition-colors uppercase tracking-widest border-b-2 border-brand-primary">Home</Link>
+            <Link href="/browse?type=movie" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Movies</Link>
+            <Link href="/browse?type=tv" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">TV Series</Link>
+            <Link href="/browse?sort=popularity" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Most Popular</Link>
+            <Link href="/browse" className="text-xs font-black text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Browse All</Link>
           </div>
         </div>
 
@@ -100,7 +101,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="w-10 h-10 rounded-full border-2 border-brand-primary p-0.5 overflow-hidden shadow-lg shadow-brand-primary/20 hover:scale-105 transition-transform group"
                 title="Account Settings"
               >
-                <img src={`https://ui-avatars.com/api/?name=${user.email?.split('@')[0]}&background=b794f4&color=fff&bold=true`} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                <img
+                  src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user.email?.split('@')[0]}&background=b794f4&color=fff&bold=true`}
+                  alt="Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </Link>
             </div>
           ) : (
@@ -130,7 +135,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {user && (
               <Link href="/watchlist" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-heart text-brand-primary"></i> Collection</Link>
             )}
-            <Link href="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-film text-brand-primary"></i> Movies</Link>
+            <Link href="/browse?type=movie" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-film text-brand-primary"></i> Movies</Link>
+            <Link href="/browse?type=tv" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-tv text-brand-primary"></i> TV Series</Link>
+            <Link href="/browse?year=1990" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-calendar text-brand-primary"></i> Classic Era</Link>
+            <Link href="/browse" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-magnifying-glass text-brand-primary"></i> Browse All</Link>
           </div>
           <div className="mt-auto space-y-6">
             <div className="h-[1px] bg-white/5 w-full"></div>

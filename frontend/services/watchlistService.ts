@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { getAnimeDetailsFromBackend } from './animeService';
+import { jikanService } from './jikanService';
 import { Anime } from '../types';
 
 export const watchlistService = {
@@ -19,12 +19,15 @@ export const watchlistService = {
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        
+        if (error) {
+            console.error('[Supabase Watchlist Error]:', error.message, error.details);
+            return [];
+        }
+
         // Fetch anime details from Jikan for each watchlist item
         const animePromises = data.map(async (item: any) => {
             try {
-                const animeDetails = await getAnimeDetailsFromBackend(item.anime_id);
+                const animeDetails = await jikanService.getAnimeDetails(item.anime_id);
                 return animeDetails;
             } catch (error) {
                 console.error(`Failed to fetch anime details for ID ${item.anime_id}:`, error);
@@ -104,11 +107,14 @@ export const historyService = {
             .eq('user_id', user.id)
             .order('updated_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.error('[Supabase History Error]:', error.message, error.details);
+            return [];
+        }
         return data;
     },
 
-    async getContinueWatching(): Promise<Array<{anime: Anime; progress: number; episode: number}>> {
+    async getContinueWatching(): Promise<Array<{ anime: Anime; progress: number; episode: number }>> {
         if (!supabase) {
             return [];
         }
@@ -123,12 +129,15 @@ export const historyService = {
             .order('updated_at', { ascending: false })
             .limit(10); // Show last 10 watched items
 
-        if (error) throw error;
-        
+        if (error) {
+            console.error('[Supabase ContinueWatching Error]:', error.message, error.details);
+            return [];
+        }
+
         // Fetch anime details from Jikan for each history item
         const continueWatchingPromises = data.map(async (item: any) => {
             try {
-                const animeDetails = await getAnimeDetailsFromBackend(item.anime_id);
+                const animeDetails = await jikanService.getAnimeDetails(item.anime_id);
                 if (animeDetails) {
                     return {
                         anime: animeDetails,
@@ -144,7 +153,7 @@ export const historyService = {
         });
 
         const results = await Promise.all(continueWatchingPromises);
-        return results.filter((item): item is {anime: Anime; progress: number; episode: number} => item !== null);
+        return results.filter((item): item is { anime: Anime; progress: number; episode: number } => item !== null);
     },
 
     async updateProgress(animeId: string, episodeId: string, seconds: number) {
@@ -164,8 +173,6 @@ export const historyService = {
                 episode_id: episodeId,
                 progress_seconds: seconds,
                 updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'user_id, anime_id'
             });
 
         if (error) console.error("Failed to update history", error);
