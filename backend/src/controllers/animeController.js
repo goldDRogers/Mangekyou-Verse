@@ -18,10 +18,11 @@ exports.searchAnime = async (req, res) => {
             return res.json(cache.search[query]);
         }
 
-        const results = await scraperService.searchAnime(query);
+        const results = await scraperService.search(query);
         cache.search[query] = results;
         res.json(results);
     } catch (error) {
+        console.error('Search Controller Error:', error);
         res.status(500).json({ error: 'Failed to search anime' });
     }
 };
@@ -33,10 +34,11 @@ exports.getAnimeDetails = async (req, res) => {
             return res.json(cache.details[id]);
         }
 
-        const details = await scraperService.getAnimeDetails(id);
+        const details = await scraperService.getAnimeInfo(id);
         cache.details[id] = details;
         res.json(details);
     } catch (error) {
+        console.error('Details Controller Error:', error);
         res.status(500).json({ error: 'Failed to get anime details' });
     }
 };
@@ -44,9 +46,10 @@ exports.getAnimeDetails = async (req, res) => {
 exports.getAnimeEpisodes = async (req, res) => {
     try {
         const id = req.params.id;
-        const episodes = await scraperService.getAnimeEpisodes(id);
+        const episodes = await scraperService.getEpisodes(id);
         res.json(episodes);
     } catch (error) {
+        console.error('Episodes Controller Error:', error);
         res.status(500).json({ error: 'Failed to get episodes' });
     }
 };
@@ -57,9 +60,10 @@ exports.getEpisodeSources = async (req, res) => {
         if (!episodeId) {
             return res.status(400).json({ error: 'Episode ID is required' });
         }
-        const sources = await scraperService.getEpisodeSources(episodeId);
+        const sources = await scraperService.getServers(episodeId);
         res.json(sources);
     } catch (error) {
+        console.error('Sources Controller Error:', error);
         res.status(500).json({ error: 'Failed to get sources' });
     }
 };
@@ -127,4 +131,33 @@ exports.getTrending = async (req, res) => {
         { id: "blue-lock-17861", rank: 6, title: "Blue Lock", poster: "https://upload.wikimedia.org/wikipedia/en/3/3b/Blue_Lock_volume_1_cover.jpg" }
     ];
     res.json(trendingData);
+};
+
+exports.proxyHiAnimeSearch = async (req, res) => {
+    try {
+        const keyword = req.query.keyword;
+        if (!keyword) {
+            return res.status(400).json({ success: false, error: 'Keyword is required' });
+        }
+
+        const results = await scraperService.search(keyword);
+
+        if (results && results.length > 0) {
+            // Find the best match - if we have multiple, the first one is usually what we want
+            // but we could add title comparison logic here
+            const topMatch = results[0];
+            const directUrl = `https://hianime.to/${topMatch.id}`;
+
+            return res.json({
+                success: true,
+                directUrl: directUrl,
+                title: topMatch.title
+            });
+        }
+
+        res.json({ success: false, message: 'No matches found' });
+    } catch (error) {
+        console.error('Proxy Controller Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to proxy HiAnime search' });
+    }
 };

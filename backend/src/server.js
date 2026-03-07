@@ -30,9 +30,12 @@ app.use(morgan('dev'));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+const animeController = require('./controllers/animeController');
+
 // Routes
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/api/anime', require('./routes/animeRoutes'));
+app.get('/api/hianime', animeController.proxyHiAnimeSearch);
 app.use('/api/referral', require('./routes/referralRoutes'));
 app.use('/api/history', require('./routes/historyRoutes'));
 app.use('/api/watchlist', require('./routes/watchlistRoutes'));
