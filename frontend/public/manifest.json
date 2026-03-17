@@ -1,0 +1,33 @@
+{
+  "name": "Mangekyou Verse",
+  "short_name": "MV",
+  "description": "The Ultimate Anime Discovery Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1011",
+  "theme_color": "#0f1011",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

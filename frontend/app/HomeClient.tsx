@@ -181,6 +181,7 @@ export default function HomeClient() {
                                 <button
                                     type="submit"
                                     className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-brand-primary rounded-full flex items-center justify-center text-black group/btn hover:scale-110 active:scale-95 transition-all shadow-lg shadow-brand-primary/30 group-hover:shadow-brand-primary/50"
+                                    suppressHydrationWarning
                                 >
                                     <i className="fa-solid fa-magnifying-glass text-base md:text-lg"></i>
                                 </button>
@@ -196,6 +197,7 @@ export default function HomeClient() {
                                         key={idx}
                                         onClick={() => router.push(`/search?q=${tag}`)}
                                         className="bg-white/5 hover:bg-brand-primary hover:text-black px-5 py-2 rounded-full text-[10px] font-bold text-gray-400 uppercase tracking-widest transition-all border border-white/5 hover:border-brand-primary/50"
+                                        suppressHydrationWarning
                                     >
                                         {tag}
                                     </button>
@@ -300,7 +302,7 @@ export default function HomeClient() {
                             <span className="w-1 h-8 bg-brand-primary rounded-full shadow-[0_0_15px_rgba(183,148,244,0.3)]"></span>
                             All Time Popular
                         </h2>
-                        <button onClick={loadMorePopular} disabled={loadingMore} className="text-[10px] font-black uppercase tracking-widest text-brand-primary hover:text-white transition-colors">
+                        <button onClick={loadMorePopular} disabled={loadingMore} className="text-[10px] font-black uppercase tracking-widest text-brand-primary hover:text-white transition-colors" suppressHydrationWarning>
                             {loadingMore ? 'Loading...' : 'Load More +'}
                         </button>
                     </div>
@@ -370,6 +372,7 @@ export default function HomeClient() {
                                         onClick={loadMoreLatest}
                                         disabled={loadingMore}
                                         className="bg-white/5 hover:bg-brand-primary hover:text-black px-12 py-4 rounded-full text-xs font-black uppercase tracking-[0.3em] transition-all border border-white/10 hover:border-brand-primary/50 shadow-xl disabled:opacity-50 flex items-center gap-3"
+                                        suppressHydrationWarning
                                     >
                                         {loadingMore ? (
                                             <>

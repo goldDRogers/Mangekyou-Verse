@@ -8,6 +8,18 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
+                hostname: 'myanimelist.net',
+            },
+            {
+                protocol: 'https',
+                hostname: 'image.tmdb.org',
+            },
+            {
+                protocol: 'https',
+                hostname: 'cdn.noitatnemucod.net',
+            },
+            {
+                protocol: 'https',
                 hostname: 's4.anilist.co',
             },
             {
@@ -21,6 +33,10 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: 'img.youtube.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'upload.wikimedia.org',
             }
         ],
         minimumCacheTTL: 60,

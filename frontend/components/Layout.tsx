@@ -68,6 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="text-2xl hover:text-brand-primary transition-colors lg:hidden"
+            suppressHydrationWarning
           >
             <i className="fa-solid fa-bars-staggered"></i>
           </button>
@@ -128,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Logo className="w-10 h-10" />
               <span className="font-black uppercase tracking-tighter text-xl">Mangekyou</span>
             </div>
-            <button onClick={() => setIsSidebarOpen(false)} className="text-2xl hover:text-brand-primary transition-colors"><i className="fa-solid fa-xmark"></i></button>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-2xl hover:text-brand-primary transition-colors" suppressHydrationWarning><i className="fa-solid fa-xmark"></i></button>
           </div>
           <div className="flex flex-col gap-6">
             <Link href="/" onClick={() => setIsSidebarOpen(false)} className="text-lg font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-4"><i className="fa-solid fa-house text-brand-primary"></i> Home</Link>

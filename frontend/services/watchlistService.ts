@@ -157,24 +157,31 @@ export const historyService = {
     },
 
     async updateProgress(animeId: string, episodeId: string, seconds: number) {
-        if (!supabase) {
-            return;
-        }
+        if (!supabase) return;
 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Upsert the progress
-        const { error } = await supabase
-            .from('watch_history')
-            .upsert({
-                user_id: user.id,
-                anime_id: animeId,
-                episode_id: episodeId,
-                progress_seconds: seconds,
-                updated_at: new Date().toISOString()
-            });
+        const epIdNum = Number(episodeId);
+        const payload = {
+            user_id: user.id,
+            anime_id: animeId,
+            episode_id: epIdNum,
+            progress_seconds: seconds,
+            updated_at: new Date().toISOString(),
+        };
 
-        if (error) console.error("Failed to update history", error);
+        try {
+            const { error, data } = await supabase
+                .from('watch_history')
+                .upsert(payload, { onConflict: 'user_id,anime_id,episode_id' });
+            if (error) {
+                console.error('[Supabase History Upsert Error]:', error.message || error);
+            } else {
+                console.log('[Supabase History] Upserted/Updated:', data);
+            }
+        } catch (err) {
+            console.error('[Supabase History Exception]:', err);
+        }
     }
 };

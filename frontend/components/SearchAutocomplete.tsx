@@ -122,6 +122,7 @@ export default function SearchAutocomplete() {
                         if (results.length > 0) setIsOpen(true);
                     }}
                     onKeyDown={handleKeyDown}
+                    suppressHydrationWarning
                 />
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
                     {isLoading && <i className="fa-solid fa-circle-notch fa-spin text-brand-primary text-xs"></i>}
